@@ -1,0 +1,64 @@
+Drug_ID,Drug_Name,Generic_Name,Strength,Dosage_Form,Therapeutic_Category,Drug_Class,VEN_Class,Storage_Type,Batch_No,Manufacture_Date,Expiry_Date,Qty_On_Hand,Unit_Cost,Unit_Price,Units_Sold_90D,Last_Sale_Date,Lead_Time_Days,Reorder_Level,Max_Stock_Level,Supplier,Location,Seasonal
+PS-001,Paracetamol,Acetaminophen,500mg,Tablet,Analgesic,OTC,E,Room Temperature,PARA-2410-A,2024-10-14,2026-10-14,4000,0.02,0.05,3789,2026-09-19,7,,25000,MedSupply Distributors,Main Pharmacy,No
+PS-001,Paracetamol,Acetaminophen,500mg,Tablet,Analgesic,OTC,E,Room Temperature,PARA-2510-B,2025-10-24,2027-10-24,9000,0.02,0.05,8526,2026-09-19,7,,25000,MedSupply Distributors,Main Pharmacy,No
+PS-001,Paracetamol,Acetaminophen,500mg,Tablet,Analgesic,OTC,E,Room Temperature,PARA-2606-C,2026-06-21,2028-06-20,6000,0.02,0.05,5684,2026-09-19,7,,25000,MedSupply Distributors,Main Pharmacy,No
+PS-002,Ibuprofen,Ibuprofen,400mg,Tablet,Analgesic,OTC,N,Room Temperature,IBUP-2411-A,2024-11-08,2026-11-08,1500,0.04,0.1,1800,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-002,Ibuprofen,Ibuprofen,400mg,Tablet,Analgesic,OTC,N,Room Temperature,IBUP-2602-B,2026-02-01,2028-02-01,3000,0.04,0.1,3600,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-003,Amoxicillin,Amoxicillin,500mg,Capsule,Anti-infective,Prescription-Only,V,Room Temperature,AMOX-2507-A,2025-07-16,2027-07-16,600,0.09,0.25,9000,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-004,Ceftriaxone,Ceftriaxone,1g,Vial,Anti-infective,Prescription-Only,V,Room Temperature,CEFT-2506-A,2025-06-26,2027-06-26,420,1.1,2.9,788,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-004,Ceftriaxone,Ceftriaxone,1g,Vial,Anti-infective,Prescription-Only,V,Room Temperature,CEFT-2603-B,2026-03-13,2028-03-12,300,1.1,2.9,562,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-005,Azithromycin,Azithromycin,250mg,Tablet,Anti-infective,Prescription-Only,E,Room Temperature,AZIT-2409-A,2024-09-07,2026-09-07,200,0.3,0.8,112,2026-09-17,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-005,Azithromycin,Azithromycin,250mg,Tablet,Anti-infective,Prescription-Only,E,Room Temperature,AZIT-2510-B,2025-10-04,2027-10-04,1400,0.3,0.8,788,2026-09-17,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-006,Lantus SoloStar,Insulin Glargine,100IU/mL,Pen,Endocrine,Prescription-Only,V,Cold Chain (2-8°C),LANT-2501-A,2025-01-17,2027-01-17,35,18.5,32.0,540,2026-09-19,10,,,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-007,NovoRapid FlexPen,Insulin Aspart,100IU/mL,Pen,Endocrine,Prescription-Only,V,Cold Chain (2-8°C),NOVO-2409-A,2024-09-14,2026-09-14,20,16.0,28.0,360,2026-09-18,10,,,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-008,Metformin,Metformin HCl,500mg,Tablet,Endocrine,Prescription-Only,E,Room Temperature,METF-2411-A,2024-11-03,2026-11-03,6000,0.03,0.09,5062,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-008,Metformin,Metformin HCl,500mg,Tablet,Endocrine,Prescription-Only,E,Room Temperature,METF-2608-B,2026-08-20,2028-08-19,10000,0.03,0.09,8438,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-009,Amlodipine,Amlodipine besylate,5mg,Tablet,Cardiovascular,Prescription-Only,E,Room Temperature,AMLO-2511-A,2025-11-13,2027-11-13,5000,0.03,0.1,6300,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-010,Atorvastatin,Atorvastatin,20mg,Tablet,Cardiovascular,Prescription-Only,E,Room Temperature,ATOR-2412-A,2024-12-08,2026-12-08,3000,0.06,0.18,2160,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-010,Atorvastatin,Atorvastatin,20mg,Tablet,Cardiovascular,Prescription-Only,E,Room Temperature,ATOR-2605-B,2026-05-12,2028-05-11,4500,0.06,0.18,3240,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-011,Losartan,Losartan potassium,50mg,Tablet,Cardiovascular,Prescription-Only,E,Room Temperature,LOSA-2509-A,2025-09-19,2027-09-19,300,0.05,0.15,2700,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-012,Ventolin Evohaler,Salbutamol,100mcg/dose,Inhaler,Respiratory,Prescription-Only,V,Room Temperature,VENT-2410-A,2024-10-17,2026-10-17,90,2.1,4.5,324,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-012,Ventolin Evohaler,Salbutamol,100mcg/dose,Inhaler,Respiratory,Prescription-Only,V,Room Temperature,VENT-2510-B,2025-10-24,2027-10-24,60,2.1,4.5,216,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-013,Adrenaline,Epinephrine,1mg/mL,Ampoule,Emergency,Prescription-Only,V,Room Temperature,ADRE-2410-A,2024-10-04,2026-10-04,12,0.9,2.5,90,2026-09-17,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-014,Morphine Sulfate,Morphine,10mg/mL,Ampoule,Analgesic (Opioid),Narcotic,V,Room Temperature,MORP-2408-A,2024-08-30,2026-08-30,40,1.8,4.0,57,2026-09-19,7,,,Controlled Drugs Depot,ICU Satellite Store,No
+PS-014,Morphine Sulfate,Morphine,10mg/mL,Ampoule,Analgesic (Opioid),Narcotic,V,Room Temperature,MORP-2504-B,2025-04-17,2027-04-17,150,1.8,4.0,213,2026-09-19,7,,,Controlled Drugs Depot,ICU Satellite Store,No
+PS-015,Durogesic,Fentanyl,25mcg/h,Transdermal Patch,Analgesic (Opioid),Narcotic,E,Room Temperature,DURO-2411-A,2024-11-13,2026-11-13,60,3.2,7.5,45,2026-09-16,7,,,Controlled Drugs Depot,Main Pharmacy,No
+PS-016,OxyNorm,Oxycodone,5mg,Capsule,Analgesic (Opioid),Narcotic,E,Room Temperature,OXYN-2508-A,2025-08-15,2027-08-15,900,0.35,0.9,1800,2026-09-19,7,,,Controlled Drugs Depot,Main Pharmacy,No
+PS-017,Tramadol,Tramadol HCl,50mg,Capsule,Analgesic (Opioid),Narcotic,E,Room Temperature,TRAM-2602-A,2026-02-01,2028-02-01,1500,0.08,0.25,180,2026-09-15,7,,,Controlled Drugs Depot,Main Pharmacy,No
+PS-018,Valium,Diazepam,5mg,Tablet,CNS,Narcotic,E,Room Temperature,VALI-2410-A,2024-10-29,2026-10-29,300,0.04,0.12,169,2026-09-18,7,,,Controlled Drugs Depot,Main Pharmacy,No
+PS-018,Valium,Diazepam,5mg,Tablet,CNS,Narcotic,E,Room Temperature,VALI-2605-B,2026-05-22,2028-05-21,500,0.04,0.12,281,2026-09-18,7,,,Controlled Drugs Depot,Main Pharmacy,No
+PS-019,Midazolam,Midazolam,5mg/mL,Ampoule,CNS,Narcotic,V,Room Temperature,MIDA-2507-A,2025-07-16,2027-07-16,0,1.2,3.0,180,2026-09-13,7,,,Controlled Drugs Depot,ICU Satellite Store,No
+PS-020,Ketalar,Ketamine,50mg/mL,Vial,Anaesthetic,Narcotic,E,Room Temperature,KETA-2502-A,2025-02-16,2027-02-16,30,4.5,9.0,36,2026-09-14,7,,,Controlled Drugs Depot,ICU Satellite Store,No
+PS-021,Naloxone,Naloxone HCl,0.4mg/mL,Ampoule,Emergency,Prescription-Only,V,Room Temperature,NALO-2412-A,2024-12-03,2026-12-03,25,2.8,6.0,27,2026-09-10,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-022,Omeprazole,Omeprazole,20mg,Capsule,Gastrointestinal,Prescription-Only,E,Room Temperature,OMEP-2410-A,2024-10-09,2026-10-09,2500,0.04,0.12,2400,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-022,Omeprazole,Omeprazole,20mg,Capsule,Gastrointestinal,Prescription-Only,E,Room Temperature,OMEP-2601-B,2026-01-12,2028-01-12,5000,0.04,0.12,4800,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-023,Pantoprazole IV,Pantoprazole,40mg,Vial,Gastrointestinal,Prescription-Only,E,Room Temperature,PANT-2510-A,2025-10-24,2027-10-24,1200,1.5,3.8,360,2026-09-17,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-024,Influenza Vaccine QIV,Influenza vaccine (quadrivalent),0.5mL,Prefilled Syringe,Vaccine,Prescription-Only,E,Cold Chain (2-8°C),INFL-2603-A,2026-03-08,2027-03-08,1800,9.5,18.0,900,2026-09-19,21,,,National Vaccine Program,Main Pharmacy,Yes
+PS-025,Engerix-B,Hepatitis B vaccine,20mcg/mL,Vial,Vaccine,Prescription-Only,V,Cold Chain (2-8°C),ENGE-2511-A,2025-11-18,2026-11-18,15,7.0,14.0,270,2026-09-18,21,,,National Vaccine Program,Main Pharmacy,No
+PS-026,Clexane,Enoxaparin sodium,40mg/0.4mL,Prefilled Syringe,Anticoagulant,Prescription-Only,V,Room Temperature,CLEX-2506-A,2025-06-06,2027-06-06,400,3.9,8.5,1080,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-027,Heparin,Heparin sodium,5000IU/mL,Vial,Anticoagulant,Prescription-Only,V,Room Temperature,HEPA-2412-A,2024-12-16,2026-12-16,80,2.2,5.0,200,2026-09-19,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-027,Heparin,Heparin sodium,5000IU/mL,Vial,Anticoagulant,Prescription-Only,V,Room Temperature,HEPA-2602-B,2026-02-21,2028-02-21,100,2.2,5.0,250,2026-09-19,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-028,Warfarin,Warfarin sodium,5mg,Tablet,Anticoagulant,Prescription-Only,E,Room Temperature,WARF-2411-A,2024-11-16,2026-11-16,900,0.05,0.15,1350,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-029,Eltroxin,Levothyroxine,50mcg,Tablet,Endocrine,Prescription-Only,E,Room Temperature,ELTR-2505-A,2025-05-17,2027-05-17,2500,0.04,0.12,2700,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-030,ORS Sachet,Oral rehydration salts,20.5g,Sachet,Gastrointestinal,OTC,V,Room Temperature,ORSS-2507-A,2025-07-16,2027-07-16,700,0.15,0.4,2250,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-031,Vitamin C,Ascorbic acid,500mg,Tablet,Supplement,OTC,N,Room Temperature,VITA-2410-A,2024-10-24,2026-10-24,4000,0.03,0.1,900,2026-09-16,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-032,Multivitamin,Multivitamin,Adult,Tablet,Supplement,OTC,N,Room Temperature,MULT-2507-A,2025-07-06,2027-07-06,1200,0.06,0.2,0,2026-05-02,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-033,Zinc Sulfate,Zinc sulfate,20mg,Dispersible Tablet,Supplement,OTC,N,Room Temperature,ZINC-2408-A,2024-08-10,2026-08-10,800,0.04,0.12,0,2026-03-23,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-034,Cetirizine,Cetirizine HCl,10mg,Tablet,Antihistamine,OTC,N,Room Temperature,CETI-2502-A,2025-02-16,2027-02-16,2000,0.02,0.08,2700,2026-09-19,7,,,MedSupply Distributors,Main Pharmacy,Yes
+PS-035,Loratadine,Loratadine,10mg,Tablet,Antihistamine,OTC,N,Room Temperature,LORA-2509-A,2025-09-19,2027-09-19,0,0.03,0.09,1800,2026-09-07,7,,,MedSupply Distributors,Main Pharmacy,Yes
+PS-036,Dexamethasone,Dexamethasone sodium phosphate,4mg/mL,Ampoule,Emergency,Prescription-Only,V,Room Temperature,DEXA-2412-A,2024-12-13,2026-12-13,300,0.6,1.5,540,2026-09-19,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-037,Hydrocortisone Cream,Hydrocortisone,1% 15g,Cream,Dermatology,OTC,N,Room Temperature,HYDR-2411-A,2024-11-02,2026-11-02,150,0.8,2.0,90,2026-09-17,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-038,Humira,Adalimumab,40mg/0.4mL,Pen,Immunology (Biologic),Prescription-Only,E,Cold Chain (2-8°C),HUMI-2510-A,2025-10-24,2027-04-17,40,480.0,720.0,18,2026-09-15,14,,20,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-039,Herceptin,Trastuzumab,440mg,Vial,Oncology,Prescription-Only,V,Cold Chain (2-8°C),HERC-2507-A,2025-07-01,2026-12-23,6,1250.0,1800.0,27,2026-09-16,14,,,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-040,Eprex,Epoetin alfa,4000IU/0.4mL,Prefilled Syringe,Haematology,Prescription-Only,E,Cold Chain (2-8°C),EPRE-2504-A,2025-04-15,2026-10-07,12,38.0,70.0,54,2026-09-18,14,,,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-040,Eprex,Epoetin alfa,4000IU/0.4mL,Prefilled Syringe,Haematology,Prescription-Only,E,Cold Chain (2-8°C),EPRE-2503-B,2025-03-25,2026-09-16,8,38.0,70.0,36,2026-09-18,14,,,ColdChain Biologics Ltd,Main Pharmacy,No
+PS-041,Tamiflu,Oseltamivir,75mg,Capsule,Anti-infective,Prescription-Only,E,Room Temperature,TAMI-2510-A,2025-10-24,2027-10-24,600,1.2,3.0,45,2026-09-11,7,,,PharmaLink Wholesale,Main Pharmacy,Yes
+PS-042,Sunscreen SPF50,Sunscreen,100mL,Lotion,Dermatology,OTC,N,Room Temperature,SUNS-2510-A,2025-10-04,2027-10-04,180,4.0,9.5,0,2026-06-11,7,,,MedSupply Distributors,Main Pharmacy,Yes
+PS-043,Nicotine Patch,Nicotine,21mg/24h,Transdermal Patch,Smoking Cessation,OTC,N,Room Temperature,NICO-2602-A,2026-02-01,2028-02-01,300,1.1,2.8,90,2026-09-13,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-044,Lasix,Furosemide,10mg/mL,Ampoule,Cardiovascular,Prescription-Only,V,Room Temperature,LASI-2510-A,2025-10-24,2027-10-24,250,0.35,0.9,720,2026-09-19,7,,,PharmaLink Wholesale,ICU Satellite Store,No
+PS-045,Glyceryl Trinitrate,Nitroglycerin,0.5mg,Sublingual Tablet,Cardiovascular,Prescription-Only,V,Room Temperature,GLYC-2410-A,2024-10-01,2026-10-01,100,0.05,0.2,90,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-045,Glyceryl Trinitrate,Nitroglycerin,0.5mg,Sublingual Tablet,Cardiovascular,Prescription-Only,V,Room Temperature,GLYC-2508-B,2025-08-15,2027-08-15,200,0.05,0.2,180,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,No
+PS-046,GlucaGen HypoKit,Glucagon,1mg,Kit,Emergency,Prescription-Only,V,Room Temperature,GLUC-2411-A,2024-11-23,2026-11-23,8,22.0,40.0,18,2026-09-12,10,,,ColdChain Biologics Ltd,ICU Satellite Store,No
+PS-047,Cough Syrup DM,Dextromethorphan,15mg/5mL 100mL,Syrup,Respiratory,OTC,N,Room Temperature,COUG-2505-A,2025-05-07,2027-05-07,900,1.5,3.5,450,2026-09-18,7,,,MedSupply Distributors,Main Pharmacy,Yes
+PS-048,Zofran,Ondansetron,4mg/2mL,Ampoule,Gastrointestinal,Prescription-Only,E,Room Temperature,ZOFR-2409-A,2024-09-11,2026-09-11,250,0.5,1.4,138,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No
+PS-048,Zofran,Ondansetron,4mg/2mL,Ampoule,Gastrointestinal,Prescription-Only,E,Room Temperature,ZOFR-2503-B,2025-03-28,2027-03-28,400,0.5,1.4,222,2026-09-19,7,,,PharmaLink Wholesale,Main Pharmacy,No

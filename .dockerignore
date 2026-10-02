@@ -1,0 +1,20 @@
+# Secrets and local state must never enter the image
+.env
+.env.*
+!.env.example
+.streamlit/secrets.toml
+data/
+
+# Local tooling
+.venv/
+venv/
+__pycache__/
+*.pyc
+.git/
+.vscode/
+.idea/
+*.log
+run.bat
+run.sh
+Dockerfile
+docker-compose.yml

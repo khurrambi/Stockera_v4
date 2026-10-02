@@ -1,0 +1,8 @@
+# Keep Unix line endings on files that run inside Linux containers or shells,
+# even when the repo is checked out on Windows.
+* text=auto
+*.sh text eol=lf
+Dockerfile text eol=lf
+*.yml text eol=lf
+.env.example text eol=lf
+*.bat text eol=crlf

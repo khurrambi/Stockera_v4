@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PharmaStock Guide</title>
+</head>
+<body>
+<!--GUIDE-START-->
+<style>
+.psg {
+  --g-bg: #f9f9f7; --g-card: #ffffff; --g-ink: #0b0b0b; --g-ink2: #52514e; --g-muted: #6f6d68;
+  --g-line: rgba(11,11,11,0.10); --g-brand: #1c5cab; --g-brand-soft: #eaf1fb;
+  --g-crit: #d03b3b; --g-crit-soft: #fdf1f1; --g-serious: #ec835a; --g-serious-soft: #fdf4ef;
+  --g-warn: #fab219; --g-warn-soft: #fef9ec; --g-good: #0ca30c; --g-good-soft: #f0f9f0;
+  --g-code: #f1f0ec;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  color: var(--g-ink); line-height: 1.55; font-size: 15px;
+  background: var(--g-bg); border-radius: 14px; padding: 28px clamp(16px, 4vw, 40px) 40px;
+  max-width: 1100px; margin: 0 auto;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) .psg {
+    --g-bg: #141413; --g-card: #1f1f1d; --g-ink: #f5f5f2; --g-ink2: #c3c2b7; --g-muted: #a19f97;
+    --g-line: rgba(255,255,255,0.12); --g-brand: #86b6ef; --g-brand-soft: #1b2a3d;
+    --g-crit-soft: #3a1d1d; --g-serious-soft: #3a261c; --g-warn-soft: #3a3019; --g-good-soft: #17301a; --g-code: #2a2a27;
+  }
+}
+:root[data-theme="dark"] .psg {
+  --g-bg: #141413; --g-card: #1f1f1d; --g-ink: #f5f5f2; --g-ink2: #c3c2b7; --g-muted: #a19f97;
+  --g-line: rgba(255,255,255,0.12); --g-brand: #86b6ef; --g-brand-soft: #1b2a3d;
+  --g-crit-soft: #3a1d1d; --g-serious-soft: #3a261c; --g-warn-soft: #3a3019; --g-good-soft: #17301a; --g-code: #2a2a27;
+}
+.psg * { box-sizing: border-box; }
+.psg .hero { display: flex; gap: 18px; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--g-line); margin-bottom: 24px; }
+.psg .hero .logo { flex: 0 0 56px; height: 56px; border-radius: 14px; background: var(--g-brand); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-size: 28px; }
+.psg .hero h1 { margin: 0; font-size: 1.7rem; letter-spacing: -0.01em; color: var(--g-ink); }
+.psg .hero p { margin: 4px 0 0; color: var(--g-ink2); }
+.psg nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; }
+.psg nav.toc a { font-size: 0.85rem; text-decoration: none; color: var(--g-brand); background: var(--g-brand-soft);
+  padding: 5px 12px; border-radius: 999px; border: 1px solid var(--g-line); }
+.psg nav.toc a:hover { text-decoration: underline; }
+.psg h2 { font-size: 1.3rem; margin: 34px 0 10px; padding-top: 6px; color: var(--g-ink); scroll-margin-top: 16px; }
+.psg h2 .n { display: inline-flex; width: 28px; height: 28px; border-radius: 8px; background: var(--g-brand); color: #fff;
+  font-size: 0.9rem; align-items: center; justify-content: center; margin-right: 10px; vertical-align: 2px; }
+.psg h3 { font-size: 1.05rem; margin: 18px 0 6px; color: var(--g-ink); }
+.psg p, .psg li { color: var(--g-ink2); }
+.psg b, .psg strong { color: var(--g-ink); }
+.psg code { background: var(--g-code); padding: 1px 6px; border-radius: 5px; font-size: 0.86em; color: var(--g-ink); }
+.psg .steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.psg .steps li { counter-increment: s; background: var(--g-card); border: 1px solid var(--g-line); border-radius: 12px;
+  padding: 12px 14px 12px 54px; position: relative; }
+.psg .steps li::before { content: counter(s); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px;
+  border-radius: 50%; background: var(--g-brand-soft); color: var(--g-brand); font-weight: 700; display: flex;
+  align-items: center; justify-content: center; font-size: 0.85rem; }
+.psg .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 14px; }
+.psg .card { background: var(--g-card); border: 1px solid var(--g-line); border-radius: 12px; padding: 16px 18px; }
+.psg .card h3 { margin-top: 0; display: flex; gap: 8px; align-items: center; }
+.psg .card .formula { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 0.82rem;
+  background: var(--g-code); color: var(--g-ink); border-radius: 8px; padding: 8px 10px; margin: 8px 0; }
+.psg .card ul { margin: 6px 0 0; padding-left: 18px; }
+.psg .box { border-radius: 12px; padding: 14px 16px; border: 1px solid var(--g-line); border-left: 5px solid; margin: 12px 0; }
+.psg .box.crit { background: var(--g-crit-soft); border-left-color: var(--g-crit); }
+.psg .box.warn { background: var(--g-warn-soft); border-left-color: var(--g-warn); }
+.psg .box.info { background: var(--g-brand-soft); border-left-color: var(--g-brand); }
+.psg .box.good { background: var(--g-good-soft); border-left-color: var(--g-good); }
+.psg .box .t { font-weight: 700; color: var(--g-ink); margin-bottom: 4px; }
+.psg .tbl { width: 100%; overflow-x: auto; }
+.psg table { border-collapse: collapse; width: 100%; font-size: 0.88rem; background: var(--g-card); border-radius: 10px; overflow: hidden; }
+.psg th, .psg td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--g-line); vertical-align: top; }
+.psg th { background: var(--g-brand-soft); color: var(--g-ink); font-weight: 600; }
+.psg td { color: var(--g-ink2); }
+.psg .pill { display: inline-block; padding: 1px 8px; border-radius: 6px; font-size: 0.78rem; font-weight: 600; white-space: nowrap; }
+.psg .pill.req { background: var(--g-crit-soft); color: var(--g-crit); }
+.psg .pill.opt { background: var(--g-code); color: var(--g-ink2); }
+.psg .matrix { display: grid; grid-template-columns: 110px repeat(3, 1fr); gap: 4px; max-width: 620px; margin: 10px 0; }
+.psg .matrix div { padding: 10px; border-radius: 8px; text-align: center; font-size: 0.86rem; }
+.psg .matrix .h { font-weight: 700; color: var(--g-ink); background: transparent; }
+.psg .matrix .c1 { background: #1c5cab; color: #fff; }
+.psg .matrix .c2 { background: #6da7ec; color: #0b0b0b; }
+.psg .matrix .c3 { background: #cde2fb; color: #0b0b0b; }
+.psg .foot { margin-top: 34px; padding-top: 16px; border-top: 1px solid var(--g-line); font-size: 0.82rem; color: var(--g-muted); }
+@media (max-width: 640px) {
+  .psg { padding: 18px 16px 28px; font-size: 14px; }
+  .psg .hero { flex-direction: column; align-items: flex-start; }
+  .psg .matrix { grid-template-columns: 70px repeat(3, 1fr); }
+}
+</style>
+
+<div class="psg">
+  <div class="hero">
+    <div class="logo">💊</div>
+    <div>
+      <h1>PharmaStock — How-to-Use &amp; Compliance Guide</h1>
+      <p>Daily inventory decisions for pharmacy and hospital stores: expiry, availability, cash and clinical criticality in one place.</p>
+    </div>
+  </div>
+
+  <nav class="toc">
+    <a href="#g-start">Quick start</a>
+    <a href="#g-data">Preparing your data</a>
+    <a href="#g-modules">The six modules</a>
+    <a href="#g-abcven">ABC-VEN matrix</a>
+    <a href="#g-compliance">Compliance playbook</a>
+    <a href="#g-routine">Daily routine</a>
+    <a href="#g-kpi">KPI glossary</a>
+    <a href="#g-faq">Troubleshooting</a>
+  </nav>
+
+  <h2 id="g-start"><span class="n">1</span>Quick start</h2>
+  <ol class="steps">
+    <li><b>Open the app.</b> It starts with a built-in sample dataset so every screen shows real examples straight away. The yellow chip in the page header tells you when you are viewing sample data.</li>
+    <li><b>Download the template.</b> On <b>Data Upload &amp; Quality</b>, download the sample CSV or the blank template to see the expected columns.</li>
+    <li><b>Upload your stock file.</b> CSV or Excel (.xlsx), one row per <b>batch/lot</b>. Column names are matched flexibly (e.g. <code>Lot No</code>, <code>Batch</code> and <code>Batch_No</code> all work).</li>
+    <li><b>Review the data-quality report.</b> Fix any red errors at source (e.g. missing expiry dates). Warnings are handled with safe defaults but should be corrected.</li>
+    <li><b>Set your policy.</b> In the sidebar under <b>Thresholds &amp; settings</b>, adjust slow-moving, overstock and safety-stock days to your pharmacy's policy, and pick your currency.</li>
+    <li><b>Act.</b> Start on the <b>Executive Dashboard</b> alerts, then work through each module. Every table has a CSV download; the sidebar offers a complete multi-sheet Excel action report.</li>
+  </ol>
+
+  <h2 id="g-data"><span class="n">2</span>Preparing your data</h2>
+  <p>Each row is <b>one batch of one product at one location</b>. A product with three batches on the shelf has three rows. Demand (<code>Units_Sold_90D</code>) may be split across batch rows or put on one row — PharmaStock sums it per product.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Column</th><th>Required?</th><th>Meaning &amp; accepted values</th></tr></thead>
+    <tbody>
+      <tr><td><code>Drug_Name</code></td><td><span class="pill req">Required</span></td><td>Brand/trade name as dispensed.</td></tr>
+      <tr><td><code>Batch_No</code></td><td><span class="pill req">Required</span></td><td>Manufacturer batch / lot number. Essential for recalls. If missing, rows are kept and flagged as a traceability gap.</td></tr>
+      <tr><td><code>Expiry_Date</code></td><td><span class="pill req">Required</span></td><td>Any common date format: <code>2027-03-31</code>, <code>31/03/2027</code>, <code>03/2027</code>, Excel dates. <b>MM/YYYY is read as the last day of that month</b>, the standard reading of pack expiry.</td></tr>
+      <tr><td><code>Qty_On_Hand</code></td><td><span class="pill req">Required</span></td><td>Units physically in stock for this batch (dispensing units, e.g. tablets, vials, pens).</td></tr>
+      <tr><td><code>Unit_Cost</code></td><td><span class="pill req">Required</span></td><td>Purchase cost per unit. Currency symbols and thousands separators are stripped.</td></tr>
+      <tr><td><code>Units_Sold_90D</code></td><td><span class="pill req">Required</span></td><td>Units dispensed in the last 90 days. Alternatively supply <code>Avg_Daily_Usage</code> and it is multiplied by 90.</td></tr>
+      <tr><td><code>Drug_ID</code></td><td><span class="pill opt">Optional</span></td><td>SKU / product code. Derived from name + strength if absent.</td></tr>
+      <tr><td><code>Drug_Class</code></td><td><span class="pill opt">Optional</span></td><td><code>Prescription-Only</code> / <code>Rx</code>, <code>Narcotic</code> / <code>Controlled</code> / <code>CD</code>, or <code>OTC</code>. Default: Prescription-Only.</td></tr>
+      <tr><td><code>VEN_Class</code></td><td><span class="pill opt">Optional</span></td><td><code>V</code> Vital, <code>E</code> Essential, <code>N</code> Non-essential. Default: E (flagged for clinical review).</td></tr>
+      <tr><td><code>Storage_Type</code></td><td><span class="pill opt">Optional</span></td><td><code>Room Temperature</code>, <code>Cold Chain (2-8°C)</code> (also "fridge", "refrigerated"), or <code>Frozen</code>.</td></tr>
+      <tr><td><code>Lead_Time_Days</code></td><td><span class="pill opt">Optional</span></td><td>Supplier lead time. Default 7 days.</td></tr>
+      <tr><td><code>Reorder_Level</code>, <code>Max_Stock_Level</code></td><td><span class="pill opt">Optional</span></td><td>Your own min/max. If blank, the reorder point is calculated and overstock uses the days-on-hand threshold.</td></tr>
+      <tr><td><code>Last_Sale_Date</code></td><td><span class="pill opt">Optional</span></td><td>Improves non-moving detection.</td></tr>
+      <tr><td>Others</td><td><span class="pill opt">Optional</span></td><td><code>Generic_Name</code>, <code>Strength</code>, <code>Dosage_Form</code>, <code>Therapeutic_Category</code>, <code>Manufacture_Date</code>, <code>Unit_Price</code>, <code>Supplier</code>, <code>Location</code>, <code>Seasonal</code> (Yes/No).</td></tr>
+    </tbody>
+  </table></div>
+  <div class="box info"><div class="t">Expired stock is never "usable"</div>Expired units cannot be dispensed, so they are excluded from usable quantity, days on hand and availability. A product whose only batch has expired shows as <b>stocked out</b> — exactly how a patient would experience it.</div>
+
+  <h2 id="g-modules"><span class="n">3</span>The six modules</h2>
+  <div class="grid">
+    <div class="card">
+      <h3>⏳ Expiry &amp; Compliance</h3>
+      <p>Buckets every batch: Expired, ≤30, 31–60, 61–90, 91–180, &gt;180 days, Unknown.</p>
+      <div class="formula">Projected unsold = batch qty − max(0, ADU × days to expiry − qty of earlier-expiring batches)</div>
+      <p>The <b>FEFO projection</b> assumes you dispense First-Expiry-First-Out at the current rate and shows which batches will expire on the shelf <i>before</i> it happens.</p>
+    </div>
+    <div class="card">
+      <h3>🐢 Slow-Moving</h3>
+      <ul>
+        <li><b>Non-moving:</b> no sales in 90 days, or last sale older than the non-moving threshold.</li>
+        <li><b>Slow-moving:</b> days on hand above the slow-moving threshold (default 180).</li>
+        <li><b>Fast-moving:</b> annual turnover ≥ 12×.</li>
+      </ul>
+      <p>Act before stock turns into expiry loss: transfer, return or stop reordering.</p>
+    </div>
+    <div class="card">
+      <h3>📦 Overstock</h3>
+      <div class="formula">Target max = Max_Stock_Level, else ADU × overstock days (default 120)<br>Excess value = (usable qty − target max) × unit cost</div>
+      <p>Highlights cash tied up in specialty biologics, cold-chain items and seasonal lines (e.g. flu vaccine after the season peak).</p>
+    </div>
+    <div class="card">
+      <h3>🚨 Stockout Risk &amp; Reorder</h3>
+      <div class="formula">Safety stock = ADU × safety days (V 14 · E 7 · N 3)<br>Reorder point = ADU × lead time + safety stock<br>Order qty = ADU × (lead time + cover days) + safety − usable</div>
+      <ul>
+        <li><b>Stocked out:</b> no usable stock (and demand exists, or the item is Vital).</li>
+        <li><b>Critical:</b> days of cover shorter than supplier lead time — you will run out before a normal order arrives.</li>
+        <li><b>Reorder now:</b> at or below reorder point.</li>
+      </ul>
+      <p>Priority = urgency × VEN weight. <b>P1</b> is same-day action (emergency order, borrow, or therapeutic substitution).</p>
+    </div>
+    <div class="card">
+      <h3>🧮 ABC-VEN</h3>
+      <p><b>ABC</b> ranks items by annual consumption value (ADU × 365 × unit cost): A = top ~80% of spend, B = next ~15%, C = remaining ~5%. <b>VEN</b> adds clinical criticality. See the matrix below.</p>
+    </div>
+    <div class="card">
+      <h3>🔄 Turnover, DOH &amp; Availability</h3>
+      <div class="formula">Turnover = annual consumption value ÷ usable stock value<br>DOH = usable qty ÷ ADU<br>Availability = SKUs with usable stock ÷ all SKUs</div>
+      <p>Healthy retail pharmacies typically turn stock 8–12× a year (30–45 DOH); targets for Vital availability are ≥ 98–100%.</p>
+    </div>
+  </div>
+
+  <h2 id="g-abcven"><span class="n">4</span>ABC-VEN matrix</h2>
+  <p>The matrix combines value (ABC) with criticality (VEN) into three management categories:</p>
+  <div class="matrix" role="table" aria-label="ABC-VEN matrix">
+    <div class="h"></div><div class="h">Vital</div><div class="h">Essential</div><div class="h">Non-essential</div>
+    <div class="h">A</div><div class="c1">AV · I</div><div class="c1">AE · I</div><div class="c1">AN · I</div>
+    <div class="h">B</div><div class="c1">BV · I</div><div class="c2">BE · II</div><div class="c2">BN · II</div>
+    <div class="h">C</div><div class="c1">CV · I</div><div class="c2">CE · II</div><div class="c3">CN · III</div>
+  </div>
+  <ul>
+    <li><b>Category I</b> — tightest control. Vital items must never stock out; A items get lean, frequent ordering and close monitoring because they hold most of your cash.</li>
+    <li><b>Category II</b> — moderate control, monthly review, standard safety stock.</li>
+    <li><b>Category III</b> — low priority. Keep minimal stock; candidates for formulary rationalisation.</li>
+  </ul>
+
+  <h2 id="g-compliance"><span class="n">5</span>Compliance playbook</h2>
+  <div class="box crit"><div class="t">⛔ Expired stock on hand</div>
+    Remove from dispensing stock immediately and place in a clearly labelled, segregated <b>quarantine</b> area. Record batch, quantity and reason. Return to supplier for credit where the agreement allows, otherwise arrange destruction through a licensed pharmaceutical waste contractor and keep the destruction certificate.</div>
+  <div class="box crit"><div class="t">🔒 Expired controlled drugs (narcotics / psychotropics)</div>
+    Keep in the controlled-drug cabinet, segregated and marked "EXPIRED – NOT FOR USE", until destruction. Destruction normally needs an <b>authorised witness</b> and an entry in the <b>controlled-drug register</b> (drug, strength, batch, quantity, date, signatures). Balances must continue to reconcile until the stock is destroyed.</div>
+  <div class="box warn"><div class="t">❄️ Cold-chain products (2–8 °C / frozen)</div>
+    Before returning, transferring or dispensing near-expiry refrigerated stock, check the fridge temperature log for excursions. Excursion-affected stock must be quarantined pending manufacturer advice. Vaccines and biologics carry the highest value per unit — overstock here is the most expensive kind.</div>
+  <div class="box warn"><div class="t">⏳ Near expiry (≤ 90 days)</div>
+    Enforce <b>FEFO</b> (First-Expiry-First-Out) on the shelf; mark short-dated packs; stop reordering the product until the batch is consumed; negotiate returns before the supplier's return window closes (often 3–6 months before expiry); consider inter-branch transfer to a site with higher demand.</div>
+  <div class="box info"><div class="t">🏷️ Batch traceability &amp; recalls</div>
+    Every received batch must be recorded with its batch/lot number and expiry. Rows flagged "No batch no." cannot be traced in a manufacturer or regulator recall — correct them at goods receipt.</div>
+  <div class="box good"><div class="t">📁 Record keeping</div>
+    Keep a dated copy of the Excel action report (sidebar) as evidence of routine expiry checks, stock reconciliation and corrective action. Many inspection frameworks expect documented, periodic date-checking of all stock.</div>
+  <p style="font-size:0.85rem;color:var(--g-muted)">This playbook describes widely used good pharmacy and good distribution practice. Always follow your national regulator, controlled-drug legislation and your organisation's SOPs where they differ.</p>
+
+  <h2 id="g-routine"><span class="n">6</span>Suggested daily routine (10 minutes)</h2>
+  <ol class="steps">
+    <li><b>Dashboard alerts:</b> clear every red banner first — Vital stockouts and expired stock.</li>
+    <li><b>Stockout Risk:</b> place P1 orders today; queue P2 orders; confirm lead times with suppliers for critical items.</li>
+    <li><b>Expiry:</b> pull expired batches to quarantine; action the ≤30-day list (dispense first, return, transfer).</li>
+    <li><b>Weekly:</b> review Overstock and Slow-Moving to stop over-ordering and free cash.</li>
+    <li><b>Monthly:</b> review the ABC-VEN matrix and turnover by category with the pharmacy &amp; therapeutics committee.</li>
+  </ol>
+
+  <h2 id="g-kpi"><span class="n">7</span>KPI glossary</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>KPI</th><th>Definition</th></tr></thead>
+    <tbody>
+      <tr><td>ADU</td><td>Average daily usage = units sold in last 90 days ÷ 90.</td></tr>
+      <tr><td>Usable stock</td><td>Quantity on hand excluding expired batches.</td></tr>
+      <tr><td>Days on hand (DOH)</td><td>Usable qty ÷ ADU. Portfolio DOH = usable value ÷ daily consumption value.</td></tr>
+      <tr><td>Inventory turnover</td><td>Annual consumption value at cost ÷ usable stock value.</td></tr>
+      <tr><td>Stock availability</td><td>% of SKUs with usable stock &gt; 0. Vital availability applies to V items only.</td></tr>
+      <tr><td>Projected expiry loss</td><td>Value of live stock the FEFO projection says will expire before it is dispensed.</td></tr>
+      <tr><td>Excess value</td><td>Value of usable stock above the target maximum.</td></tr>
+      <tr><td>Daily revenue at risk</td><td>For stocked-out items: ADU × unit price — the sales (or patient doses) lost per day.</td></tr>
+    </tbody>
+  </table></div>
+
+  <h2 id="g-faq"><span class="n">8</span>Troubleshooting</h2>
+  <ul>
+    <li><b>"Required column(s) not found"</b> — rename your headers to match the template, or use one of the accepted aliases (e.g. <code>Qty</code>, <code>Lot</code>, <code>Expiry</code>, <code>Cost</code>, <code>Sold 90D</code>).</li>
+    <li><b>Dates look wrong</b> — ambiguous dates like <code>03/04/2027</code> are resolved by whichever order (day-first or month-first) parses more of the column. Use ISO dates (<code>YYYY-MM-DD</code>) to remove ambiguity.</li>
+    <li><b>Everything is "Essential"</b> — your file has no VEN column. Add V/E/N classifications agreed with your clinical team.</li>
+    <li><b>Old Excel .xls files</b> — save as .xlsx or CSV first.</li>
+    <li><b>Analysis dated in the past or future</b> — change the reference date in the sidebar to analyse a stock snapshot as of a specific day.</li>
+  </ul>
+
+  <div class="foot">PharmaStock v1.0 · Decision-support tool. Final clinical and regulatory decisions remain with the responsible pharmacist.</div>
+</div>
+<!--GUIDE-END-->
+</body>
+</html>

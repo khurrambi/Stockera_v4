@@ -1,0 +1,33 @@
+# Start:           docker compose up -d --build        then open http://localhost:8501
+# Add a paid user: docker compose exec app python auth.py add-user alice@example.com --tier paid
+# Usage report:    docker compose exec app python auth.py list
+# Logs / stop:     docker compose logs -f app  |  docker compose down
+#
+# Works the same on Docker Desktop for Windows (WSL 2) and macOS (Intel and
+# Apple Silicon). The image builds for the host's own architecture.
+
+services:
+  app:
+    build: .
+    image: stockera:latest
+    container_name: stockera
+    ports:
+      - "${STOCKERA_PORT:-8501}:8501"
+    env_file:
+      # Copy .env.example to .env and set ANTHROPIC_API_KEY. Without it the free
+      # tier still works and the AI page reports that it is not configured.
+      - path: .env
+        required: false
+    environment:
+      STOCKERA_DATA_DIR: /app/data
+    volumes:
+      # A named volume instead of a bind mount: SQLite file locking is
+      # unreliable across the Windows/macOS file-sharing layer, and a named
+      # volume avoids host UID/permission mismatches on both platforms.
+      - stockera-data:/app/data
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  stockera-data:
