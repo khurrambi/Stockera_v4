@@ -1,10 +1,19 @@
 [theme]
-base = "light"
+font = "sans serif"
+
+# Both modes are defined, so Streamlit builds a Light and a Dark theme. The app
+# defaults to Dark and switches between them from the sidebar toggle.
+[theme.light]
 primaryColor = "#1c5cab"
 backgroundColor = "#f9f9f7"
 secondaryBackgroundColor = "#eef2f7"
 textColor = "#0b0b0b"
-font = "sans serif"
+
+[theme.dark]
+primaryColor = "#3987e5"
+backgroundColor = "#121211"
+secondaryBackgroundColor = "#1d1d1c"
+textColor = "#f5f5f2"
 
 [server]
 maxUploadSize = 200

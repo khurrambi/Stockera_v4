@@ -9,13 +9,40 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
+# Colour tokens per mode. Status hues (critical/serious/warning/good/info) are
+# fixed across modes; only the surfaces, inks and tinted backgrounds change.
+THEME_TOKENS: dict[str, dict[str, str]] = {
+    "light": {
+        "ink": "#0b0b0b", "ink-2": "#52514e", "muted": "#6f6d68", "baseline": "#c3c2b7",
+        "line": "rgba(11,11,11,0.10)", "card": "#ffffff", "shadow": "0 1px 2px rgba(11,11,11,0.04)",
+        "brand": "#1c5cab", "logo": "#1c5cab", "chip-bg": "rgba(28,92,171,0.08)", "chip-line": "rgba(28,92,171,0.18)",
+        "callout": "#f4f7fb", "nav-active": "#1c5cab", "nav-hover": "rgba(28,92,171,0.09)",
+        "track": "rgba(11,11,11,0.08)", "sample-bg": "rgba(250,178,25,0.14)",
+        "critical-soft": "#fdf1f1", "serious-soft": "#fdf4ef", "warning-soft": "#fef9ec",
+        "info-soft": "#f1f6fd", "good-soft": "#f0f9f0",
+        "critical-tag": "rgba(208,59,59,0.10)", "serious-tag": "rgba(236,131,90,0.14)",
+        "warning-tag": "rgba(250,178,25,0.16)", "good-tag": "rgba(12,163,12,0.10)",
+        "critical-ink": "#a32424", "serious-ink": "#9a4418", "warning-ink": "#7a5200", "good-ink": "#006300",
+    },
+    "dark": {
+        "ink": "#f5f5f2", "ink-2": "#c3c2b7", "muted": "#a19f97", "baseline": "#4a4a47",
+        "line": "rgba(255,255,255,0.10)", "card": "#1a1a19", "shadow": "0 1px 2px rgba(0,0,0,0.40)",
+        "brand": "#6da7ec", "logo": "#256abf", "chip-bg": "rgba(57,135,229,0.14)", "chip-line": "rgba(109,167,236,0.30)",
+        "callout": "#172231", "nav-active": "#256abf", "nav-hover": "rgba(57,135,229,0.16)",
+        "track": "rgba(255,255,255,0.12)", "sample-bg": "rgba(250,178,25,0.16)",
+        "critical-soft": "#2e1a1a", "serious-soft": "#2f221b", "warning-soft": "#2e2716",
+        "info-soft": "#172231", "good-soft": "#172a19",
+        "critical-tag": "rgba(230,103,103,0.18)", "serious-tag": "rgba(236,131,90,0.18)",
+        "warning-tag": "rgba(250,178,25,0.18)", "good-tag": "rgba(12,163,12,0.20)",
+        "critical-ink": "#f19a9a", "serious-ink": "#f4b08f", "warning-ink": "#fcd06b", "good-ink": "#5fd35f",
+    },
+}
+_STATUS_TOKENS = {"critical": "#d03b3b", "serious": "#ec835a", "warning": "#fab219", "good": "#0ca30c", "info": "#2a78d6"}
+
 CSS = """
 <style>
 :root {
-  --ps-ink: #0b0b0b; --ps-ink-2: #52514e; --ps-muted: #6f6d68;
-  --ps-line: rgba(11,11,11,0.10); --ps-card: #ffffff; --ps-brand: #1c5cab;
-  --ps-critical: #d03b3b; --ps-serious: #ec835a; --ps-warning: #fab219; --ps-good: #0ca30c; --ps-info: #2a78d6;
-  --ps-nav-active: #1c5cab; --ps-nav-hover: rgba(28,92,171,0.09);
+__TOKENS__
 }
 .block-container { padding-top: 3.6rem; padding-bottom: 3rem; max-width: 1480px; }
 h1, h2, h3 { letter-spacing: -0.01em; }
@@ -25,49 +52,54 @@ h1, h2, h3 { letter-spacing: -0.01em; }
 .ps-header h1 { font-size:1.75rem; margin:0; padding:0; color:var(--ps-ink); }
 .ps-header .ps-sub { color:var(--ps-muted); font-size:0.92rem; margin-top:4px; }
 .ps-chip { display:inline-block; font-size:0.78rem; padding:3px 10px; border-radius:999px;
-  background:rgba(28,92,171,0.08); color:var(--ps-brand); border:1px solid rgba(28,92,171,0.18); margin-left:6px; }
-.ps-chip.sample { background:rgba(250,178,25,0.14); color:#7a5200; border-color:rgba(250,178,25,0.4); }
+  background:var(--ps-chip-bg); color:var(--ps-brand); border:1px solid var(--ps-chip-line); margin-left:6px; }
+.ps-chip.sample { background:var(--ps-sample-bg); color:var(--ps-warning-ink); border-color:rgba(250,178,25,0.4); }
 
 .ps-kpis { display:grid; grid-template-columns:repeat(auto-fit, minmax(190px, 1fr)); gap:12px; margin:4px 0 18px; }
 .ps-kpi { background:var(--ps-card); border:1px solid var(--ps-line); border-radius:12px; padding:14px 16px 12px;
-  border-top:3px solid var(--ps-info); box-shadow:0 1px 2px rgba(11,11,11,0.04); }
+  border-top:3px solid var(--ps-info); box-shadow:var(--ps-shadow); }
 .ps-kpi.critical { border-top-color:var(--ps-critical); }
 .ps-kpi.serious { border-top-color:var(--ps-serious); }
 .ps-kpi.warning { border-top-color:var(--ps-warning); }
 .ps-kpi.good { border-top-color:var(--ps-good); }
-.ps-kpi.neutral { border-top-color:#c3c2b7; }
+.ps-kpi.neutral { border-top-color:var(--ps-baseline); }
 .ps-kpi .lbl { font-size:0.78rem; font-weight:600; text-transform:uppercase; letter-spacing:0.04em; color:var(--ps-muted); }
 .ps-kpi .val { font-size:1.65rem; font-weight:700; color:var(--ps-ink); margin-top:4px; line-height:1.15; }
 .ps-kpi .sub { font-size:0.82rem; color:var(--ps-ink-2); margin-top:4px; }
 .ps-kpi .tag { display:inline-block; font-size:0.72rem; font-weight:600; margin-top:6px; padding:1px 8px; border-radius:6px; }
-.ps-kpi.critical .tag { background:rgba(208,59,59,0.10); color:#a32424; }
-.ps-kpi.serious .tag { background:rgba(236,131,90,0.14); color:#9a4418; }
-.ps-kpi.warning .tag { background:rgba(250,178,25,0.16); color:#7a5200; }
-.ps-kpi.good .tag { background:rgba(12,163,12,0.10); color:#006300; }
+.ps-kpi.critical .tag { background:var(--ps-critical-tag); color:var(--ps-critical-ink); }
+.ps-kpi.serious .tag { background:var(--ps-serious-tag); color:var(--ps-serious-ink); }
+.ps-kpi.warning .tag { background:var(--ps-warning-tag); color:var(--ps-warning-ink); }
+.ps-kpi.good .tag { background:var(--ps-good-tag); color:var(--ps-good-ink); }
 
 .ps-alert { display:flex; gap:12px; align-items:flex-start; border-radius:10px; padding:12px 16px; margin:0 0 10px;
-  border:1px solid var(--ps-line); border-left-width:5px; background:#fff; }
-.ps-alert .ic { font-size:1.25rem; line-height:1.3; }
+  border:1px solid var(--ps-line); border-left-width:5px; background:var(--ps-card); }
+.ps-alert .ic { flex:0 0 20px; width:20px; height:20px; margin-top:2px; color:var(--ps-info); }
+.ps-alert .ic svg { display:block; width:20px; height:20px; }
+.ps-alert.critical .ic { color:var(--ps-critical); }
+.ps-alert.serious .ic { color:var(--ps-serious); }
+.ps-alert.warning .ic { color:var(--ps-warning); }
+.ps-alert.good .ic { color:var(--ps-good); }
 .ps-alert .tt { font-weight:700; color:var(--ps-ink); }
 .ps-alert .bd { color:var(--ps-ink-2); font-size:0.92rem; margin-top:2px; }
-.ps-alert.critical { border-left-color:var(--ps-critical); background:#fdf1f1; }
-.ps-alert.serious { border-left-color:var(--ps-serious); background:#fdf4ef; }
-.ps-alert.warning { border-left-color:var(--ps-warning); background:#fef9ec; }
-.ps-alert.info { border-left-color:var(--ps-info); background:#f1f6fd; }
-.ps-alert.good { border-left-color:var(--ps-good); background:#f0f9f0; }
+.ps-alert.critical { border-left-color:var(--ps-critical); background:var(--ps-critical-soft); }
+.ps-alert.serious { border-left-color:var(--ps-serious); background:var(--ps-serious-soft); }
+.ps-alert.warning { border-left-color:var(--ps-warning); background:var(--ps-warning-soft); }
+.ps-alert.info { border-left-color:var(--ps-info); background:var(--ps-info-soft); }
+.ps-alert.good { border-left-color:var(--ps-good); background:var(--ps-good-soft); }
 
 .ps-section { font-size:1.05rem; font-weight:700; color:var(--ps-ink); margin:18px 0 2px; }
 .ps-section-sub { font-size:0.86rem; color:var(--ps-muted); margin-bottom:8px; }
-.ps-callout { background:#f4f7fb; border:1px solid rgba(28,92,171,0.15); border-radius:10px; padding:12px 16px;
+.ps-callout { background:var(--ps-callout); border:1px solid var(--ps-chip-line); border-radius:10px; padding:12px 16px;
   font-size:0.9rem; color:var(--ps-ink-2); margin:6px 0 14px; }
 .ps-callout b { color:var(--ps-ink); }
 
 section[data-testid="stSidebar"] .ps-brand { display:flex; gap:10px; align-items:center; margin:-8px 0 22px; min-height:44px; }
-section[data-testid="stSidebar"] .ps-brand .logo { width:38px; height:38px; border-radius:10px; background:#1c5cab;
+section[data-testid="stSidebar"] .ps-brand .logo { width:38px; height:38px; border-radius:10px; background:var(--ps-logo);
   color:#fff; display:flex; align-items:center; justify-content:center; font-size:20px; }
-section[data-testid="stSidebar"] .ps-brand .nm { font-weight:800; font-size:1.2rem; color:#0b0b0b; line-height:1.1; }
-section[data-testid="stSidebar"] .ps-brand .tg { font-size:0.75rem; color:#6f6d68; }
-section[data-testid="stSidebar"] .ps-source { font-size:0.8rem; color:#52514e; background:#fff; border:1px solid var(--ps-line);
+section[data-testid="stSidebar"] .ps-brand .nm { font-weight:800; font-size:1.2rem; color:var(--ps-ink); line-height:1.1; }
+section[data-testid="stSidebar"] .ps-brand .tg { font-size:0.75rem; color:var(--ps-muted); }
+section[data-testid="stSidebar"] .ps-source { font-size:0.8rem; color:var(--ps-ink-2); background:var(--ps-card); border:1px solid var(--ps-line);
   border-radius:8px; padding:8px 10px; margin-bottom:8px; }
 
 /* The scroll-reset helper is a zero-height components.html iframe; keep it
@@ -118,11 +150,31 @@ section[data-testid="stSidebar"] .stButton > button[data-testid$="-primary"]:foc
 </style>
 """
 
-ICONS = {"critical": "⛔", "serious": "⚠️", "warning": "⏳", "info": "ℹ️", "good": "✅"}
+def _icon(body: str) -> str:
+    return ('<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" '
+            f'stroke-linejoin="round" aria-hidden="true">{body}</svg>')
 
 
-def inject_css() -> None:
-    st.html(CSS)
+# Outline icons drawn in the alert's status colour.
+ICONS = {
+    "critical": _icon('<circle cx="12" cy="12" r="9.5"/><path d="M7.5 12h9"/>'),
+    "serious": _icon('<path d="M12 3 2.5 20h19z"/><path d="M12 10v4.5"/><path d="M12 17.3v.2"/>'),
+    "warning": _icon('<circle cx="12" cy="12" r="9.5"/><path d="M12 7v5l3.5 2"/>'),
+    "info": _icon('<circle cx="12" cy="12" r="9.5"/><path d="M12 11v5.5"/><path d="M12 7.6v.2"/>'),
+    "good": _icon('<circle cx="12" cy="12" r="9.5"/><path d="m7.8 12.3 2.8 2.8 5.6-5.8"/>'),
+}
+
+# Pharmacy cross for the sidebar brand tile.
+LOGO_SVG = ('<svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true">'
+            '<path d="M9 3h6v6h6v6h-6v6H9v-6H3V9h6z" fill="#fff" stroke="#fff" stroke-width="1.5" '
+            'stroke-linejoin="round"/></svg>')
+
+
+def inject_css(mode: str = "dark") -> None:
+    """Inject the stylesheet with the colour tokens for ``mode`` ("dark" or "light")."""
+    values = {**THEME_TOKENS.get(mode, THEME_TOKENS["dark"]), **_STATUS_TOKENS}
+    root = "\n".join(f"  --ps-{k}: {v};" for k, v in values.items())
+    st.html(CSS.replace("__TOKENS__", f"  color-scheme: {mode};\n{root}"))
 
 
 def money(v: float | None, cur: str, decimals: int = 0) -> str:
@@ -167,7 +219,7 @@ def kpi_cards(cards: list[dict]) -> None:
 
 
 def alert(kind: str, title: str, body: str = "") -> None:
-    icon = ICONS.get(kind, "ℹ️")
+    icon = ICONS.get(kind, ICONS["info"])
     st.markdown(
         f'<div class="ps-alert {kind}" role="alert"><div class="ic">{icon}</div><div>'
         f'<div class="tt">{title}</div><div class="bd">{body}</div></div></div>',

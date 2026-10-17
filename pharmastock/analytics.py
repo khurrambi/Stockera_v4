@@ -31,7 +31,7 @@ EXPIRY_BUCKETS = [
 ]
 
 MOVEMENT_CLASSES = ["Fast-moving", "Normal", "Slow-moving", "Non-moving", "Out of stock"]
-STOCK_STATUSES = ["Stocked out", "Critical – below lead time", "Reorder now", "Healthy", "Overstock", "No demand"]
+STOCK_STATUSES = ["Stocked out", "Critical (below lead time)", "Reorder now", "Healthy", "Overstock", "No demand"]
 ABC_VEN_CATEGORY = {
     "AV": "I", "AE": "I", "AN": "I", "BV": "I", "CV": "I",
     "BE": "II", "CE": "II", "BN": "II",
@@ -44,7 +44,7 @@ ABC_VEN_CATEGORY_POLICY = {
 }
 _VEN_RANK = {"V": 0, "E": 1, "N": 2}
 _VEN_WEIGHT = {"V": 3, "E": 2, "N": 1}
-_URGENCY = {"Stocked out": 3, "Critical – below lead time": 2, "Reorder now": 1}
+_URGENCY = {"Stocked out": 3, "Critical (below lead time)": 2, "Reorder now": 1}
 
 
 @dataclass(frozen=True)
@@ -133,24 +133,24 @@ def _batch_actions(b: pd.DataFrame) -> pd.DataFrame:
     bucket = b["Expiry_Bucket"].astype(str)
     unsold = b["Projected_Unsold_Qty"]
 
-    action = pd.Series("No action – within shelf life", index=b.index, dtype=object)
-    action[bucket.eq("91–180 days") & (unsold > 0)] = "Plan ahead: projected surplus before expiry – slow reorders, offer inter-branch transfer."
+    action = pd.Series("No action needed: within shelf life", index=b.index, dtype=object)
+    action[bucket.eq("91–180 days") & (unsold > 0)] = "Plan ahead: surplus projected at expiry. Slow reorders and offer an inter-branch transfer."
     action[bucket.eq("61–90 days")] = "Monitor: flag on shelf, enforce FEFO rotation, stop reordering this batch."
-    action[bucket.eq("61–90 days") & (unsold > 0)] = "Act now: surplus will expire – arrange supplier return/credit or transfer."
-    action[bucket.eq("31–60 days")] = "Prioritise dispensing (FEFO); request supplier return/credit if surplus."
+    action[bucket.eq("61–90 days") & (unsold > 0)] = "Act now: surplus will expire. Arrange a supplier return, credit or transfer."
+    action[bucket.eq("31–60 days")] = "Dispense these first (FEFO); ask the supplier for a return or credit on any surplus."
     action[bucket.eq("≤30 days")] = "Urgent: dispense first, return/transfer surplus, prepare quarantine at expiry."
-    action[bucket.eq("Expired")] = "Quarantine immediately – remove from dispensing stock, arrange return or destruction."
+    action[bucket.eq("Expired")] = "Quarantine now: remove from dispensing stock and arrange return or destruction."
     action[bucket.eq("Expired") & narcotic] = (
-        "Quarantine in CD cabinet – witnessed destruction and Controlled Drug register entry required."
+        "Quarantine in the CD cabinet. Witnessed destruction and a controlled-drug register entry are required."
     )
     action[bucket.eq("Unknown expiry")] = "Physically verify expiry date and correct the stock record."
     b["Recommended_Action"] = action
 
     flags = pd.DataFrame(index=b.index)
-    flags["expired"] = np.where(bucket.eq("Expired"), "EXPIRED – do not dispense", "")
+    flags["expired"] = np.where(bucket.eq("Expired"), "EXPIRED: do not dispense", "")
     flags["cd"] = np.where(narcotic, "Controlled drug", "")
-    flags["cold"] = np.where(cold, "Cold chain – check temp. log", "")
-    flags["batch"] = np.where(b["Batch_No"].eq("UNKNOWN-BATCH"), "No batch no. – recall risk", "")
+    flags["cold"] = np.where(cold, "Cold chain: check temp. log", "")
+    flags["batch"] = np.where(b["Batch_No"].eq("UNKNOWN-BATCH"), "No batch no. (recall risk)", "")
     flags["expiry"] = np.where(bucket.eq("Unknown expiry"), "Expiry not recorded", "")
     b["Compliance_Flags"] = flags.apply(lambda r: " · ".join(v for v in r if v), axis=1)
     return b
@@ -249,7 +249,7 @@ def build_sku(b: pd.DataFrame, s: Settings) -> pd.DataFrame:
     status[overstock] = "Overstock"
     status[(adu <= 0) & (usable > 0) & ~has_max] = "No demand"
     status[(usable <= sku["Reorder_Point"]) & (adu > 0)] = "Reorder now"
-    status[(sku["Days_On_Hand"] < sku["Lead_Time_Days"]) & (adu > 0)] = "Critical – below lead time"
+    status[(sku["Days_On_Hand"] < sku["Lead_Time_Days"]) & (adu > 0)] = "Critical (below lead time)"
     # A zero balance is a stockout when patients need it (demand, or Vital by definition);
     # otherwise it is simply an item nobody is asking for.
     status[(usable <= 0) & ((adu > 0) | sku["VEN_Class"].eq("V"))] = "Stocked out"
@@ -274,7 +274,7 @@ def build_sku(b: pd.DataFrame, s: Settings) -> pd.DataFrame:
     score = status.map(_URGENCY).fillna(0) * sku["VEN_Class"].map(_VEN_WEIGHT).fillna(1)
     sku["Priority_Score"] = score
     sku["Priority"] = np.select([score >= 6, score >= 3, score > 0],
-                                ["P1 – Immediate", "P2 – Urgent", "P3 – Routine"], default="")
+                                ["P1 (immediate)", "P2 (urgent)", "P3 (routine)"], default="")
 
     # --- ABC & ABC-VEN ---------------------------------------------------------
     sku = _abc(sku, s)
@@ -337,8 +337,8 @@ def compute_kpis(b: pd.DataFrame, sku: pd.DataFrame) -> dict:
         "projected_loss_value": float(b.loc[~b["Is_Expired"], "Projected_Loss_Value"].sum()),
         "stocked_out": int(sku["Stock_Status"].eq("Stocked out").sum()),
         "vital_stocked_out": int((vital["Stock_Status"] == "Stocked out").sum()),
-        "critical_items": int(sku["Stock_Status"].eq("Critical – below lead time").sum()),
-        "vital_critical": int((vital["Stock_Status"] == "Critical – below lead time").sum()),
+        "critical_items": int(sku["Stock_Status"].eq("Critical (below lead time)").sum()),
+        "vital_critical": int((vital["Stock_Status"] == "Critical (below lead time)").sum()),
         "reorder_items": int(sku["Stock_Status"].isin(list(_URGENCY)).sum()),
         "reorder_value": float(sku["Suggested_Order_Value"].sum()),
         "overstock_items": int(sku["Is_Overstock"].sum()),

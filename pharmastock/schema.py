@@ -72,7 +72,7 @@ COLUMN_DESCRIPTIONS = {
     "Max_Stock_Level": "Optional maximum stock (units). Used for overstock checks.",
     "Supplier": "Supplier / wholesaler name.",
     "Location": "Store, branch or ward.",
-    "Seasonal": "Yes / No - seasonal items such as flu vaccines.",
+    "Seasonal": "Yes / No. Seasonal items such as flu vaccines.",
 }
 
 # Header aliases: normalised header (lowercase alphanumerics only) -> canonical name.
@@ -201,7 +201,7 @@ def load_file(content: bytes, filename: str) -> pd.DataFrame:
     df = df.dropna(how="all").dropna(axis=1, how="all")
     df.columns = [str(c).strip() for c in df.columns]
     if df.empty or len(df.columns) == 0:
-        raise DataLoadError("The file contains headers only - no data rows were found.")
+        raise DataLoadError("The file contains headers only. No data rows were found.")
     return df
 
 
@@ -381,7 +381,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
         return pd.DataFrame(columns=ALL_COLUMNS), report
     if "Batch_No" in missing_required:
         df["Batch_No"] = ""
-        report.add("warning", "Batch_No", "No batch/lot column - batch traceability is unavailable.", len(df))
+        report.add("warning", "Batch_No", "No batch/lot column, so batch traceability is unavailable.", len(df))
 
     # --- Text columns --------------------------------------------------------
     for col in ("Drug_Name", "Batch_No", "Generic_Name", "Strength", "Dosage_Form",
@@ -420,7 +420,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
 
     missing_batch = df["Batch_No"].eq("")
     if missing_batch.any() and "Batch_No" not in missing_required:
-        report.add("warning", "Batch_No", "Missing batch/lot number - traceability gap for recalls.",
+        report.add("warning", "Batch_No", "Missing batch/lot number. These rows cannot be traced in a recall.",
                    int(missing_batch.sum()))
     df.loc[missing_batch, "Batch_No"] = "UNKNOWN-BATCH"
 
@@ -442,7 +442,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
     else:
         df["VEN_Class"] = "E"
         report.defaulted_columns.append("VEN_Class")
-        report.add("warning", "VEN_Class", "No VEN column - all items treated as Essential.", len(df))
+        report.add("warning", "VEN_Class", "No VEN column, so all items are treated as Essential.", len(df))
 
     if "Storage_Type" in df.columns:
         df["Storage_Type"] = df["Storage_Type"].map(_normalise_storage)
@@ -461,7 +461,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
     bad_expiry = df["Expiry_Date"].isna()
     if bad_expiry.any():
         report.add("error", "Expiry_Date",
-                   "Missing or unreadable expiry date - rows kept and flagged 'Unknown expiry' for physical check.",
+                   "Missing or unreadable expiry date. Rows are kept and flagged 'Unknown expiry' for a physical check.",
                    int(bad_expiry.sum()))
 
     for col in ("Manufacture_Date", "Last_Sale_Date"):
@@ -478,7 +478,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
     if "Manufacture_Date" in df.columns:
         inverted = df["Manufacture_Date"].notna() & df["Expiry_Date"].notna() & (df["Manufacture_Date"] > df["Expiry_Date"])
         if inverted.any():
-            report.add("warning", "Manufacture_Date", "Manufacture date is after expiry date - check data entry.",
+            report.add("warning", "Manufacture_Date", "Manufacture date is after expiry date. Check the data entry.",
                        int(inverted.sum()))
 
     # --- Numbers ---------------------------------------------------------------
@@ -494,7 +494,7 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
 
     zero_cost = df["Unit_Cost"].eq(0)
     if zero_cost.any():
-        report.add("info", "Unit_Cost", "Zero unit cost - these items carry no value in ABC or cash metrics.",
+        report.add("info", "Unit_Cost", "Zero unit cost: these items carry no value in ABC or cash metrics.",
                    int(zero_cost.sum()))
 
     if "Unit_Price" in df.columns:
@@ -523,11 +523,11 @@ def clean_dataset(raw: pd.DataFrame) -> tuple[pd.DataFrame, QualityReport]:
     dup = df.duplicated(subset=["Drug_ID", "Batch_No", "Location"], keep=False) & df["Batch_No"].ne("UNKNOWN-BATCH")
     if dup.any():
         report.add("warning", "Batch_No",
-                   "Duplicate Drug + Batch + Location rows found - quantities are summed per SKU.",
+                   "Duplicate Drug + Batch + Location rows found. Quantities are summed per SKU.",
                    int(dup.sum()))
 
     if report.defaulted_columns:
-        report.add("info", ", ".join(report.defaulted_columns), "Optional column(s) not supplied - defaults applied.")
+        report.add("info", ", ".join(report.defaulted_columns), "Optional column(s) not supplied; defaults applied.")
 
     df = df[ALL_COLUMNS].reset_index(drop=True)
     report.clean_rows = len(df)

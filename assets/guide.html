@@ -34,7 +34,11 @@
 .psg * { box-sizing: border-box; }
 .psg .hero { display: flex; gap: 18px; align-items: center; padding-bottom: 20px; border-bottom: 1px solid var(--g-line); margin-bottom: 24px; }
 .psg .hero .logo { flex: 0 0 56px; height: 56px; border-radius: 14px; background: var(--g-brand); color: #fff;
-  display: flex; align-items: center; justify-content: center; font-size: 28px; }
+  display: flex; align-items: center; justify-content: center; font-size: 28px; position: relative; }
+.psg .hero .logo::before, .psg .hero .logo::after { content: ""; position: absolute; left: 50%; top: 50%;
+  background: #fff; border-radius: 2px; transform: translate(-50%, -50%); }
+.psg .hero .logo::before { width: 28px; height: 9px; }
+.psg .hero .logo::after { width: 9px; height: 28px; }
 .psg .hero h1 { margin: 0; font-size: 1.7rem; letter-spacing: -0.01em; color: var(--g-ink); }
 .psg .hero p { margin: 4px 0 0; color: var(--g-ink2); }
 .psg nav.toc { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; }
@@ -90,10 +94,10 @@
 
 <div class="psg">
   <div class="hero">
-    <div class="logo">💊</div>
+    <div class="logo" aria-hidden="true"></div>
     <div>
-      <h1>PharmaStock — How-to-Use &amp; Compliance Guide</h1>
-      <p>Daily inventory decisions for pharmacy and hospital stores: expiry, availability, cash and clinical criticality in one place.</p>
+      <h1>PharmaStock how-to-use and compliance guide</h1>
+      <p>PharmaStock reports expiry, stock availability, cash tied up in stock and clinical criticality for pharmacy and hospital stores.</p>
     </div>
   </div>
 
@@ -110,143 +114,131 @@
 
   <h2 id="g-start"><span class="n">1</span>Quick start</h2>
   <ol class="steps">
-    <li><b>Open the app.</b> It starts with a built-in sample dataset so every screen shows real examples straight away. The yellow chip in the page header tells you when you are viewing sample data.</li>
-    <li><b>Download the template.</b> On <b>Data Upload &amp; Quality</b>, download the sample CSV or the blank template to see the expected columns.</li>
-    <li><b>Upload your stock file.</b> CSV or Excel (.xlsx), one row per <b>batch/lot</b>. Column names are matched flexibly (e.g. <code>Lot No</code>, <code>Batch</code> and <code>Batch_No</code> all work).</li>
-    <li><b>Review the data-quality report.</b> Fix any red errors at source (e.g. missing expiry dates). Warnings are handled with safe defaults but should be corrected.</li>
-    <li><b>Set your policy.</b> In the sidebar under <b>Thresholds &amp; settings</b>, adjust slow-moving, overstock and safety-stock days to your pharmacy's policy, and pick your currency.</li>
-    <li><b>Act.</b> Start on the <b>Executive Dashboard</b> alerts, then work through each module. Every table has a CSV download; the sidebar offers a complete multi-sheet Excel action report.</li>
+    <li>Open the app. It starts with a built-in sample dataset, so every page has data to show. A yellow chip in the page header tells you when you are looking at sample data.</li>
+    <li>On Data Upload &amp; Quality, download the sample CSV or the blank template to see the expected columns.</li>
+    <li>Upload your stock file as CSV or Excel (.xlsx), with one row per batch or lot. Column names are matched flexibly, so <code>Lot No</code>, <code>Batch</code> and <code>Batch_No</code> all work.</li>
+    <li>Read the data-quality report. Fix red errors, such as missing expiry dates, in your source system. Warnings are handled with safe defaults, but you should still correct them.</li>
+    <li>Open Thresholds &amp; settings in the sidebar. Set the slow-moving, overstock and safety-stock days to your pharmacy's policy, and pick your currency.</li>
+    <li>Start with the alerts on the Executive Dashboard, then work through each module. Every table has a CSV download, and the sidebar has a multi-sheet Excel action report.</li>
   </ol>
 
   <h2 id="g-data"><span class="n">2</span>Preparing your data</h2>
-  <p>Each row is <b>one batch of one product at one location</b>. A product with three batches on the shelf has three rows. Demand (<code>Units_Sold_90D</code>) may be split across batch rows or put on one row — PharmaStock sums it per product.</p>
+  <p>Each row is one batch of one product at one location. A product with three batches on the shelf has three rows. Demand (<code>Units_Sold_90D</code>) can be split across batch rows or put on one row. PharmaStock adds it up per product.</p>
   <div class="tbl"><table>
-    <thead><tr><th>Column</th><th>Required?</th><th>Meaning &amp; accepted values</th></tr></thead>
+    <thead><tr><th>Column</th><th>Required?</th><th>Meaning and accepted values</th></tr></thead>
     <tbody>
-      <tr><td><code>Drug_Name</code></td><td><span class="pill req">Required</span></td><td>Brand/trade name as dispensed.</td></tr>
-      <tr><td><code>Batch_No</code></td><td><span class="pill req">Required</span></td><td>Manufacturer batch / lot number. Essential for recalls. If missing, rows are kept and flagged as a traceability gap.</td></tr>
-      <tr><td><code>Expiry_Date</code></td><td><span class="pill req">Required</span></td><td>Any common date format: <code>2027-03-31</code>, <code>31/03/2027</code>, <code>03/2027</code>, Excel dates. <b>MM/YYYY is read as the last day of that month</b>, the standard reading of pack expiry.</td></tr>
-      <tr><td><code>Qty_On_Hand</code></td><td><span class="pill req">Required</span></td><td>Units physically in stock for this batch (dispensing units, e.g. tablets, vials, pens).</td></tr>
-      <tr><td><code>Unit_Cost</code></td><td><span class="pill req">Required</span></td><td>Purchase cost per unit. Currency symbols and thousands separators are stripped.</td></tr>
-      <tr><td><code>Units_Sold_90D</code></td><td><span class="pill req">Required</span></td><td>Units dispensed in the last 90 days. Alternatively supply <code>Avg_Daily_Usage</code> and it is multiplied by 90.</td></tr>
-      <tr><td><code>Drug_ID</code></td><td><span class="pill opt">Optional</span></td><td>SKU / product code. Derived from name + strength if absent.</td></tr>
+      <tr><td><code>Drug_Name</code></td><td><span class="pill req">Required</span></td><td>Brand or trade name as dispensed.</td></tr>
+      <tr><td><code>Batch_No</code></td><td><span class="pill req">Required</span></td><td>Manufacturer batch or lot number, needed for recalls. Rows without one are kept and flagged as a traceability gap.</td></tr>
+      <tr><td><code>Expiry_Date</code></td><td><span class="pill req">Required</span></td><td>Any common date format: <code>2027-03-31</code>, <code>31/03/2027</code>, <code>03/2027</code> or an Excel date. MM/YYYY is read as the last day of that month, which is how pack expiry dates are normally read.</td></tr>
+      <tr><td><code>Qty_On_Hand</code></td><td><span class="pill req">Required</span></td><td>Units physically in stock for this batch, in dispensing units (tablets, vials, pens).</td></tr>
+      <tr><td><code>Unit_Cost</code></td><td><span class="pill req">Required</span></td><td>Purchase cost per unit. Currency symbols and thousands separators are removed.</td></tr>
+      <tr><td><code>Units_Sold_90D</code></td><td><span class="pill req">Required</span></td><td>Units dispensed in the last 90 days. You can supply <code>Avg_Daily_Usage</code> instead, and it is multiplied by 90.</td></tr>
+      <tr><td><code>Drug_ID</code></td><td><span class="pill opt">Optional</span></td><td>SKU or product code. Built from name and strength if absent.</td></tr>
       <tr><td><code>Drug_Class</code></td><td><span class="pill opt">Optional</span></td><td><code>Prescription-Only</code> / <code>Rx</code>, <code>Narcotic</code> / <code>Controlled</code> / <code>CD</code>, or <code>OTC</code>. Default: Prescription-Only.</td></tr>
-      <tr><td><code>VEN_Class</code></td><td><span class="pill opt">Optional</span></td><td><code>V</code> Vital, <code>E</code> Essential, <code>N</code> Non-essential. Default: E (flagged for clinical review).</td></tr>
-      <tr><td><code>Storage_Type</code></td><td><span class="pill opt">Optional</span></td><td><code>Room Temperature</code>, <code>Cold Chain (2-8°C)</code> (also "fridge", "refrigerated"), or <code>Frozen</code>.</td></tr>
+      <tr><td><code>VEN_Class</code></td><td><span class="pill opt">Optional</span></td><td><code>V</code> Vital, <code>E</code> Essential, <code>N</code> Non-essential. Default: E, flagged for clinical review.</td></tr>
+      <tr><td><code>Storage_Type</code></td><td><span class="pill opt">Optional</span></td><td><code>Room Temperature</code>, <code>Cold Chain (2-8°C)</code> (also "fridge" or "refrigerated"), or <code>Frozen</code>.</td></tr>
       <tr><td><code>Lead_Time_Days</code></td><td><span class="pill opt">Optional</span></td><td>Supplier lead time. Default 7 days.</td></tr>
-      <tr><td><code>Reorder_Level</code>, <code>Max_Stock_Level</code></td><td><span class="pill opt">Optional</span></td><td>Your own min/max. If blank, the reorder point is calculated and overstock uses the days-on-hand threshold.</td></tr>
-      <tr><td><code>Last_Sale_Date</code></td><td><span class="pill opt">Optional</span></td><td>Improves non-moving detection.</td></tr>
+      <tr><td><code>Reorder_Level</code>, <code>Max_Stock_Level</code></td><td><span class="pill opt">Optional</span></td><td>Your own minimum and maximum. If blank, the reorder point is calculated and overstock uses the days-on-hand threshold.</td></tr>
+      <tr><td><code>Last_Sale_Date</code></td><td><span class="pill opt">Optional</span></td><td>Used to detect non-moving stock more accurately.</td></tr>
       <tr><td>Others</td><td><span class="pill opt">Optional</span></td><td><code>Generic_Name</code>, <code>Strength</code>, <code>Dosage_Form</code>, <code>Therapeutic_Category</code>, <code>Manufacture_Date</code>, <code>Unit_Price</code>, <code>Supplier</code>, <code>Location</code>, <code>Seasonal</code> (Yes/No).</td></tr>
     </tbody>
   </table></div>
-  <div class="box info"><div class="t">Expired stock is never "usable"</div>Expired units cannot be dispensed, so they are excluded from usable quantity, days on hand and availability. A product whose only batch has expired shows as <b>stocked out</b> — exactly how a patient would experience it.</div>
+  <div class="box info"><div class="t">Expired stock is never counted as usable</div>Expired units cannot be dispensed, so they are left out of usable quantity, days on hand and availability. A product whose only batch has expired shows as stocked out, which is what a patient asking for it would find.</div>
 
   <h2 id="g-modules"><span class="n">3</span>The six modules</h2>
   <div class="grid">
     <div class="card">
-      <h3>⏳ Expiry &amp; Compliance</h3>
-      <p>Buckets every batch: Expired, ≤30, 31–60, 61–90, 91–180, &gt;180 days, Unknown.</p>
+      <h3>Expiry &amp; Compliance</h3>
+      <p>Every batch is placed in an expiry window: Expired, ≤30, 31–60, 61–90, 91–180, &gt;180 days, or Unknown.</p>
       <div class="formula">Projected unsold = batch qty − max(0, ADU × days to expiry − qty of earlier-expiring batches)</div>
-      <p>The <b>FEFO projection</b> assumes you dispense First-Expiry-First-Out at the current rate and shows which batches will expire on the shelf <i>before</i> it happens.</p>
+      <p>The FEFO projection assumes you dispense First-Expiry-First-Out at the current rate. It shows which batches will expire on the shelf before it happens.</p>
     </div>
     <div class="card">
-      <h3>🐢 Slow-Moving</h3>
-      <ul>
-        <li><b>Non-moving:</b> no sales in 90 days, or last sale older than the non-moving threshold.</li>
-        <li><b>Slow-moving:</b> days on hand above the slow-moving threshold (default 180).</li>
-        <li><b>Fast-moving:</b> annual turnover ≥ 12×.</li>
-      </ul>
-      <p>Act before stock turns into expiry loss: transfer, return or stop reordering.</p>
+      <h3>Slow-Moving</h3>
+      <p>An item is non-moving when it had no sales in 90 days or its last sale is older than the non-moving threshold. It is slow-moving when its days on hand are above the slow-moving threshold (default 180), and fast-moving when it turns over 12 or more times a year.</p>
+      <p>Transfer, return or stop reordering these items before they expire.</p>
     </div>
     <div class="card">
-      <h3>📦 Overstock</h3>
+      <h3>Overstock</h3>
       <div class="formula">Target max = Max_Stock_Level, else ADU × overstock days (default 120)<br>Excess value = (usable qty − target max) × unit cost</div>
-      <p>Highlights cash tied up in specialty biologics, cold-chain items and seasonal lines (e.g. flu vaccine after the season peak).</p>
+      <p>Shows the cash held in excess stock, including specialty biologics, cold-chain items and seasonal lines such as flu vaccine after the season.</p>
     </div>
     <div class="card">
-      <h3>🚨 Stockout Risk &amp; Reorder</h3>
+      <h3>Stockout Risk &amp; Reorder</h3>
       <div class="formula">Safety stock = ADU × safety days (V 14 · E 7 · N 3)<br>Reorder point = ADU × lead time + safety stock<br>Order qty = ADU × (lead time + cover days) + safety − usable</div>
-      <ul>
-        <li><b>Stocked out:</b> no usable stock (and demand exists, or the item is Vital).</li>
-        <li><b>Critical:</b> days of cover shorter than supplier lead time — you will run out before a normal order arrives.</li>
-        <li><b>Reorder now:</b> at or below reorder point.</li>
-      </ul>
-      <p>Priority = urgency × VEN weight. <b>P1</b> is same-day action (emergency order, borrow, or therapeutic substitution).</p>
+      <p>An item is stocked out when it has no usable stock and either has demand or is Vital. It is critical when its days of cover are shorter than the supplier lead time, so it will run out before a normal order arrives. It needs reordering when it is at or below its reorder point.</p>
+      <p>Priority is urgency multiplied by VEN weight. P1 items need action the same day: an emergency order, borrowing from another site, or therapeutic substitution.</p>
     </div>
     <div class="card">
-      <h3>🧮 ABC-VEN</h3>
-      <p><b>ABC</b> ranks items by annual consumption value (ADU × 365 × unit cost): A = top ~80% of spend, B = next ~15%, C = remaining ~5%. <b>VEN</b> adds clinical criticality. See the matrix below.</p>
+      <h3>ABC-VEN</h3>
+      <p>ABC ranks items by annual consumption value (ADU × 365 × unit cost). A items make up about the top 80% of spend, B the next 15% and C the last 5%. VEN adds clinical criticality. The matrix below combines the two.</p>
     </div>
     <div class="card">
-      <h3>🔄 Turnover, DOH &amp; Availability</h3>
+      <h3>Turnover, DOH &amp; Availability</h3>
       <div class="formula">Turnover = annual consumption value ÷ usable stock value<br>DOH = usable qty ÷ ADU<br>Availability = SKUs with usable stock ÷ all SKUs</div>
-      <p>Healthy retail pharmacies typically turn stock 8–12× a year (30–45 DOH); targets for Vital availability are ≥ 98–100%.</p>
+      <p>Retail pharmacies typically turn stock 8–12 times a year (30–45 days on hand). Targets for Vital availability are usually 98–100%.</p>
     </div>
   </div>
 
   <h2 id="g-abcven"><span class="n">4</span>ABC-VEN matrix</h2>
-  <p>The matrix combines value (ABC) with criticality (VEN) into three management categories:</p>
+  <p>The matrix combines value (ABC) with criticality (VEN) to give three management categories:</p>
   <div class="matrix" role="table" aria-label="ABC-VEN matrix">
     <div class="h"></div><div class="h">Vital</div><div class="h">Essential</div><div class="h">Non-essential</div>
     <div class="h">A</div><div class="c1">AV · I</div><div class="c1">AE · I</div><div class="c1">AN · I</div>
     <div class="h">B</div><div class="c1">BV · I</div><div class="c2">BE · II</div><div class="c2">BN · II</div>
     <div class="h">C</div><div class="c1">CV · I</div><div class="c2">CE · II</div><div class="c3">CN · III</div>
   </div>
-  <ul>
-    <li><b>Category I</b> — tightest control. Vital items must never stock out; A items get lean, frequent ordering and close monitoring because they hold most of your cash.</li>
-    <li><b>Category II</b> — moderate control, monthly review, standard safety stock.</li>
-    <li><b>Category III</b> — low priority. Keep minimal stock; candidates for formulary rationalisation.</li>
-  </ul>
+  <p>Category I gets the tightest control. Vital items must never stock out, and A items are ordered in small, frequent quantities and checked closely because they hold most of your cash. Category II gets moderate control: a monthly review and standard safety stock. Category III is low priority. Keep minimal stock, and consider these items for formulary rationalisation.</p>
 
   <h2 id="g-compliance"><span class="n">5</span>Compliance playbook</h2>
-  <div class="box crit"><div class="t">⛔ Expired stock on hand</div>
-    Remove from dispensing stock immediately and place in a clearly labelled, segregated <b>quarantine</b> area. Record batch, quantity and reason. Return to supplier for credit where the agreement allows, otherwise arrange destruction through a licensed pharmaceutical waste contractor and keep the destruction certificate.</div>
-  <div class="box crit"><div class="t">🔒 Expired controlled drugs (narcotics / psychotropics)</div>
-    Keep in the controlled-drug cabinet, segregated and marked "EXPIRED – NOT FOR USE", until destruction. Destruction normally needs an <b>authorised witness</b> and an entry in the <b>controlled-drug register</b> (drug, strength, batch, quantity, date, signatures). Balances must continue to reconcile until the stock is destroyed.</div>
-  <div class="box warn"><div class="t">❄️ Cold-chain products (2–8 °C / frozen)</div>
-    Before returning, transferring or dispensing near-expiry refrigerated stock, check the fridge temperature log for excursions. Excursion-affected stock must be quarantined pending manufacturer advice. Vaccines and biologics carry the highest value per unit — overstock here is the most expensive kind.</div>
-  <div class="box warn"><div class="t">⏳ Near expiry (≤ 90 days)</div>
-    Enforce <b>FEFO</b> (First-Expiry-First-Out) on the shelf; mark short-dated packs; stop reordering the product until the batch is consumed; negotiate returns before the supplier's return window closes (often 3–6 months before expiry); consider inter-branch transfer to a site with higher demand.</div>
-  <div class="box info"><div class="t">🏷️ Batch traceability &amp; recalls</div>
-    Every received batch must be recorded with its batch/lot number and expiry. Rows flagged "No batch no." cannot be traced in a manufacturer or regulator recall — correct them at goods receipt.</div>
-  <div class="box good"><div class="t">📁 Record keeping</div>
-    Keep a dated copy of the Excel action report (sidebar) as evidence of routine expiry checks, stock reconciliation and corrective action. Many inspection frameworks expect documented, periodic date-checking of all stock.</div>
-  <p style="font-size:0.85rem;color:var(--g-muted)">This playbook describes widely used good pharmacy and good distribution practice. Always follow your national regulator, controlled-drug legislation and your organisation's SOPs where they differ.</p>
+  <div class="box crit"><div class="t">Expired stock on hand</div>
+    Remove it from dispensing stock straight away and put it in a clearly labelled, separate <b>quarantine</b> area. Record the batch, quantity and reason. Return it to the supplier for credit if the agreement allows. Otherwise arrange destruction through a licensed pharmaceutical waste contractor and keep the destruction certificate.</div>
+  <div class="box crit"><div class="t">Expired controlled drugs (narcotics and psychotropics)</div>
+    Keep them in the controlled-drug cabinet, separated and marked "EXPIRED: NOT FOR USE", until they are destroyed. Destruction normally needs an authorised <b>witness</b> and an entry in the controlled-drug register (drug, strength, batch, quantity, date and signatures). The register balance must keep matching the stock until destruction.</div>
+  <div class="box warn"><div class="t">Cold-chain products (2–8 °C or frozen)</div>
+    Check the fridge temperature log for excursions before you return, transfer or dispense near-expiry refrigerated stock. Stock affected by an excursion must be quarantined until the manufacturer advises. Vaccines and biologics cost the most per unit, so overstock of them costs the most.</div>
+  <div class="box warn"><div class="t">Near expiry (90 days or less)</div>
+    Dispense First-Expiry-First-Out (FEFO) and mark short-dated packs on the shelf. Stop reordering the product until the batch is used up. Agree returns before the supplier's return window closes, which is often 3 to 6 months before expiry. You can also transfer stock to a branch with higher demand.</div>
+  <div class="box info"><div class="t">Batch traceability and recalls</div>
+    Record every batch you receive with its batch or lot number and expiry date. Rows flagged "No batch no." cannot be traced in a manufacturer or regulator recall, so correct them at goods receipt.</div>
+  <div class="box good"><div class="t">Record keeping</div>
+    Keep a dated copy of the Excel action report from the sidebar as a record of expiry checks, stock reconciliation and corrective action. Many inspection frameworks expect regular, documented date checks of all stock.</div>
+  <p style="font-size:0.85rem;color:var(--g-muted)">This playbook follows common good pharmacy and good distribution practice. Where your national regulator, controlled-drug law or your organisation's SOPs differ, follow them.</p>
 
   <h2 id="g-routine"><span class="n">6</span>Suggested daily routine (10 minutes)</h2>
   <ol class="steps">
-    <li><b>Dashboard alerts:</b> clear every red banner first — Vital stockouts and expired stock.</li>
-    <li><b>Stockout Risk:</b> place P1 orders today; queue P2 orders; confirm lead times with suppliers for critical items.</li>
-    <li><b>Expiry:</b> pull expired batches to quarantine; action the ≤30-day list (dispense first, return, transfer).</li>
-    <li><b>Weekly:</b> review Overstock and Slow-Moving to stop over-ordering and free cash.</li>
-    <li><b>Monthly:</b> review the ABC-VEN matrix and turnover by category with the pharmacy &amp; therapeutics committee.</li>
+    <li>Clear every red banner on the dashboard first. These are Vital stockouts and expired stock.</li>
+    <li>On Stockout Risk &amp; Reorder, place P1 orders today and queue P2 orders. Confirm lead times with suppliers for critical items.</li>
+    <li>On Expiry &amp; Compliance, move expired batches to quarantine and work through the 30-day list: dispense first, return or transfer.</li>
+    <li>Each week, review Overstock and Slow-Moving to stop over-ordering and release cash.</li>
+    <li>Each month, review the ABC-VEN matrix and turnover by category with the pharmacy and therapeutics committee.</li>
   </ol>
 
   <h2 id="g-kpi"><span class="n">7</span>KPI glossary</h2>
   <div class="tbl"><table>
     <thead><tr><th>KPI</th><th>Definition</th></tr></thead>
     <tbody>
-      <tr><td>ADU</td><td>Average daily usage = units sold in last 90 days ÷ 90.</td></tr>
-      <tr><td>Usable stock</td><td>Quantity on hand excluding expired batches.</td></tr>
-      <tr><td>Days on hand (DOH)</td><td>Usable qty ÷ ADU. Portfolio DOH = usable value ÷ daily consumption value.</td></tr>
+      <tr><td>ADU</td><td>Average daily usage: units sold in the last 90 days ÷ 90.</td></tr>
+      <tr><td>Usable stock</td><td>Quantity on hand, excluding expired batches.</td></tr>
+      <tr><td>Days on hand (DOH)</td><td>Usable qty ÷ ADU. Portfolio DOH is usable value ÷ daily consumption value.</td></tr>
       <tr><td>Inventory turnover</td><td>Annual consumption value at cost ÷ usable stock value.</td></tr>
-      <tr><td>Stock availability</td><td>% of SKUs with usable stock &gt; 0. Vital availability applies to V items only.</td></tr>
-      <tr><td>Projected expiry loss</td><td>Value of live stock the FEFO projection says will expire before it is dispensed.</td></tr>
+      <tr><td>Stock availability</td><td>Share of SKUs with usable stock above 0. Vital availability counts V items only.</td></tr>
+      <tr><td>Projected expiry loss</td><td>Value of live stock that the FEFO projection says will expire before it is dispensed.</td></tr>
       <tr><td>Excess value</td><td>Value of usable stock above the target maximum.</td></tr>
-      <tr><td>Daily revenue at risk</td><td>For stocked-out items: ADU × unit price — the sales (or patient doses) lost per day.</td></tr>
+      <tr><td>Daily revenue at risk</td><td>For stocked-out items, ADU × unit price: the sales (or patient doses) lost each day.</td></tr>
     </tbody>
   </table></div>
 
   <h2 id="g-faq"><span class="n">8</span>Troubleshooting</h2>
   <ul>
-    <li><b>"Required column(s) not found"</b> — rename your headers to match the template, or use one of the accepted aliases (e.g. <code>Qty</code>, <code>Lot</code>, <code>Expiry</code>, <code>Cost</code>, <code>Sold 90D</code>).</li>
-    <li><b>Dates look wrong</b> — ambiguous dates like <code>03/04/2027</code> are resolved by whichever order (day-first or month-first) parses more of the column. Use ISO dates (<code>YYYY-MM-DD</code>) to remove ambiguity.</li>
-    <li><b>Everything is "Essential"</b> — your file has no VEN column. Add V/E/N classifications agreed with your clinical team.</li>
-    <li><b>Old Excel .xls files</b> — save as .xlsx or CSV first.</li>
-    <li><b>Analysis dated in the past or future</b> — change the reference date in the sidebar to analyse a stock snapshot as of a specific day.</li>
+    <li>If you see "Required column(s) not found", rename your headers to match the template or use an accepted alias such as <code>Qty</code>, <code>Lot</code>, <code>Expiry</code>, <code>Cost</code> or <code>Sold 90D</code>.</li>
+    <li>If dates look wrong, the file probably has ambiguous dates like <code>03/04/2027</code>. PharmaStock reads the column as day-first or month-first, whichever parses more rows. ISO dates (<code>YYYY-MM-DD</code>) avoid the problem.</li>
+    <li>If every item shows as Essential, your file has no VEN column. Add V/E/N classes agreed with your clinical team.</li>
+    <li>Old Excel .xls files cannot be read. Save them as .xlsx or CSV first.</li>
+    <li>To analyse a stock snapshot from another day, change the reference date in the sidebar.</li>
   </ul>
 
-  <div class="foot">PharmaStock v1.0 · Decision-support tool. Final clinical and regulatory decisions remain with the responsible pharmacist.</div>
+  <div class="foot">PharmaStock v1.0. This is a decision-support tool: final clinical and regulatory decisions stay with the responsible pharmacist.</div>
 </div>
 <!--GUIDE-END-->
 </body>

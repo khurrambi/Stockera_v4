@@ -37,7 +37,7 @@ from pharmastock.schema import (
 
 st.set_page_config(
     page_title="PharmaStock · Pharmacy Inventory Intelligence",
-    page_icon="💊",
+    page_icon=":material/medication:",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -62,7 +62,95 @@ CURRENCIES = ["$", "€", "£", "Rs ", "₹", "AED ", "SAR ", "PKR ", "¥"]
 VEN_NAMES = {"V": "Vital", "E": "Essential", "N": "Non-essential"}
 PLOT_CONFIG = {"displaylogo": False, "modeBarButtonsToRemove": ["lasso2d", "select2d", "autoScale2d"]}
 
-ui.inject_css()
+# Colour mode: dark by default. Light is remembered in the URL (?theme=light)
+# so a browser refresh keeps it.
+if "ps_dark" not in st.session_state:
+    st.session_state["ps_dark"] = st.query_params.get("theme") != "light"
+THEME = "dark" if st.session_state["ps_dark"] else "light"
+
+
+def _on_theme_toggle() -> None:
+    if st.session_state["ps_dark"]:
+        st.query_params.pop("theme", None)
+    else:
+        st.query_params["theme"] = "light"
+
+
+ui.inject_css(THEME)
+
+# Theme sync.
+#
+# The sidebar toggle is the single source of truth. Streamlit's own widgets and
+# the canvas-drawn tables follow its native Light/Dark theme, which has no
+# Python API, so this switches it the way a user would: it remembers the choice
+# where Streamlit reads it on load, then picks the matching entry in the main
+# menu (hidden while it does so). The menu's own theme entries are hidden so the
+# two can never disagree. data-theme on <html> drives the guide's stylesheet.
+# The mode is part of the HTML, so the frame only re-runs when the mode changes;
+# it sits at the top so the switch happens before the analysis runs.
+components.html(
+    """
+    <script>
+    (function () {
+      const WANT = "%s";
+      const win = window.parent;
+      const doc = win.document;
+      const root = doc.documentElement;
+      root.setAttribute('data-theme', WANT.toLowerCase());
+      try {
+        win.localStorage.setItem('stActiveTheme-' + win.location.pathname + '-v2', JSON.stringify(WANT));
+      } catch (e) {}
+
+      let sheet = doc.getElementById('ps-theme-css');
+      if (!sheet) {
+        sheet = doc.createElement('style');
+        sheet.id = 'ps-theme-css';
+        doc.head.appendChild(sheet);
+      }
+      const HIDE_ITEMS = '[data-testid^="stMainMenuItem-theme-"],' +
+        '[data-testid="stMainMenuItem-theme-Dark"] + [data-testid="stMainMenuDivider"]' +
+        '{ display:none !important; }';
+      const HIDE_MENU = '[data-testid="stMainMenuPopover"] { opacity:0 !important; pointer-events:none; }';
+      sheet.textContent = HIDE_ITEMS;
+
+      const isDark = function () {
+        const app = doc.querySelector('.stApp');
+        if (!app) { return null; }
+        const m = win.getComputedStyle(app).backgroundColor.match(/[\\d.]+/g);
+        if (!m) { return null; }
+        return (0.299 * m[0] + 0.587 * m[1] + 0.114 * m[2]) < 128;
+      };
+      const want = WANT === 'Dark';
+      if (isDark() === want) { return; }
+
+      if (win.__psThemeTimer) { win.clearInterval(win.__psThemeTimer); }
+      const button = doc.querySelector('[data-testid="stMainMenuButton"]');
+      if (!button) { win.location.reload(); return; }
+      sheet.textContent = HIDE_ITEMS + HIDE_MENU;
+      button.click();
+      const started = Date.now();
+      win.__psThemeTimer = win.setInterval(function () {
+        const item = doc.querySelector('[data-testid="stMainMenuItem-theme-' + WANT + '"]');
+        const timedOut = Date.now() - started > 3000;
+        if (item || timedOut) {
+          win.clearInterval(win.__psThemeTimer);
+          win.__psThemeTimer = null;
+          if (item) { item.click(); }
+          if (doc.querySelector('[data-testid="stMainMenuPopover"]')) {
+            doc.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true }));
+          }
+          win.setTimeout(function () {
+            sheet.textContent = HIDE_ITEMS;
+            if (doc.activeElement && doc.activeElement.blur) { doc.activeElement.blur(); }
+          }, 150);
+          if (timedOut && isDark() !== want) { win.location.reload(); }
+        }
+      }, 25);
+    })();
+    </script>
+    """ % ("Dark" if THEME == "dark" else "Light"),
+    height=0,
+)
 
 
 @st.cache_resource(show_spinner=False)
@@ -164,17 +252,17 @@ def login_form(key: str) -> None:
 
 def sidebar_account() -> None:
     if user is None:
-        with st.expander("🔐 Paid plan sign-in", expanded=False):
+        with st.expander("Paid plan sign-in", expanded=False, icon=":material/lock:"):
             login_form("login_sidebar")
         return
     plan = "Paid plan" if user.is_paid else "Free plan"
-    body = f"👤 <b>{html.escape(user.email)}</b><br>{plan}"
+    body = f"<b>{html.escape(user.email)}</b><br>{plan}"
     if user.is_paid:
         u = token_counter.get_usage(user.email)
         body += (f" · AI tokens {u.used:,} / {u.limit:,}"
-                 f'<div style="height:6px;border-radius:3px;background:rgba(11,11,11,.08);margin-top:6px">'
+                 f'<div style="height:6px;border-radius:3px;background:var(--ps-track);margin-top:6px">'
                  f'<div style="height:6px;border-radius:3px;width:{u.fraction * 100:.0f}%;'
-                 f'background:{"#d03b3b" if u.fraction >= 0.9 else "#1c5cab"}"></div></div>')
+                 f'background:{"var(--ps-critical)" if u.fraction >= 0.9 else "var(--ps-brand)"}"></div></div>')
     st.markdown(f'<div class="ps-source">{body}</div>', unsafe_allow_html=True)
     with st.form("logout_form", border=False):
         if st.form_submit_button("Sign out", width="stretch"):
@@ -196,10 +284,12 @@ except DataLoadError as exc:
 
 with st.sidebar:
     st.markdown(
-        '<div class="ps-brand"><div class="logo">💊</div><div><div class="nm">PharmaStock</div>'
+        f'<div class="ps-brand"><div class="logo">{ui.LOGO_SVG}</div><div><div class="nm">PharmaStock</div>'
         '<div class="tg">Pharmacy Inventory Intelligence</div></div></div>',
         unsafe_allow_html=True,
     )
+    st.toggle("Dark mode", key="ps_dark", on_change=_on_theme_toggle,
+              help="Switch between the dark and light colour theme.")
     # Nav rows are buttons, not a radio: baseweb's radio mark cannot be styled
     # away reliably, and buttons render close to their final form so the
     # sidebar does not reflow once the stylesheet lands.
@@ -207,7 +297,7 @@ with st.sidebar:
         st.session_state["page"] = PAGES[0]
     with st.container(key="ps-nav", gap=6):
         for i, name in enumerate(PAGES):
-            label = f"{name} 🔒" if name == AI_PAGE and not (user and user.is_paid) else name
+            label = f"{name} :material/lock:" if name == AI_PAGE and not (user and user.is_paid) else name
             st.button(label, key=f"nav_{i}", width="stretch",
                       type="primary" if st.session_state["page"] == name else "tertiary",
                       on_click=_select_page, args=(name,))
@@ -216,12 +306,12 @@ with st.sidebar:
 
     src_label = html.escape(dataset["label"])
     st.markdown(
-        f'<div class="ps-source">📁 <b>{src_label}</b><br>{report.clean_rows:,} batch rows loaded'
+        f'<div class="ps-source"><b>{src_label}</b><br>{report.clean_rows:,} batch rows loaded'
         f'{" · data-quality " + format(report.score, ".0f") + "%" if report.clean_rows else ""}</div>',
         unsafe_allow_html=True,
     )
 
-    with st.expander("⚙️ Thresholds & settings", expanded=False):
+    with st.expander("Thresholds & settings", expanded=False, icon=":material/tune:"):
         ref_date = st.date_input("Reference date (analysis 'today')", value=date.today(), key="ref_date",
                                  help="Expiry, days since last sale and projected stockout dates are measured from this date.")
         currency = st.selectbox("Currency symbol", CURRENCIES, index=0, key="currency")
@@ -250,14 +340,14 @@ with st.sidebar:
     active_filters = 0
     applied_filters: dict[str, list[str]] = {}  # label -> values, recorded on each AI report
     if not clean_df.empty:
-        with st.expander("🔎 Filters", expanded=False):
+        with st.expander("Filters", expanded=False, icon=":material/filter_list:"):
             for col, label in (("Location", "Location"), ("Therapeutic_Category", "Therapeutic category"),
                                ("Drug_Class", "Drug class"), ("VEN_Class", "VEN class"),
                                ("Storage_Type", "Storage")):
                 options = sorted(clean_df[col].dropna().astype(str).unique())
                 chosen = st.multiselect(
                     label, options, key=f"f_{col}", placeholder="All",
-                    format_func=(lambda v: f"{v} – {VEN_NAMES.get(v, v)}") if col == "VEN_Class" else str,
+                    format_func=(lambda v: f"{v} ({VEN_NAMES.get(v, v)})") if col == "VEN_Class" else str,
                 )
                 if chosen:
                     filtered_df = filtered_df[filtered_df[col].astype(str).isin(chosen)]
@@ -281,7 +371,7 @@ with st.sidebar:
             file_name=f"PharmaStock_Action_Report_{settings.reference_date:%Y-%m-%d}.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
             icon=":material/table_view:", width="stretch", type="primary",
-            help="All modules in one workbook - keep a dated copy as compliance evidence.",
+            help="All modules in one workbook. Keep a dated copy as compliance evidence.",
         )
     st.divider()
     sidebar_account()
@@ -416,7 +506,7 @@ def require_analysis() -> Analysis | None:
 
 
 def plot(fig, key: str) -> None:
-    st.plotly_chart(fig, config=PLOT_CONFIG, key=key)
+    st.plotly_chart(ch.themed(fig, THEME), config=PLOT_CONFIG, key=key)
 
 
 # ---------------------------------------------------------------------------
@@ -436,14 +526,14 @@ def page_dashboard() -> None:
                  f"{names}. Place emergency orders, borrow from a nearby site or arrange therapeutic substitution today.")
         alerts += 1
     if k["expired_batches"]:
-        cd = f" — including <b>{k['expired_cd_batches']} controlled-drug batch(es)</b> needing witnessed destruction" \
+        cd = f", including {k['expired_cd_batches']} controlled-drug batch(es) that need witnessed destruction" \
             if k["expired_cd_batches"] else ""
         ui.alert("critical", f"{k['expired_batches']} expired batch(es) still on hand · {ui.money(k['expired_value'], cur)}",
                  f"Quarantine immediately and remove from dispensing stock{cd}.")
         alerts += 1
     if k["vital_critical"]:
         ui.alert("serious", f"{k['vital_critical']} Vital item(s) will run out before a normal delivery arrives",
-                 "Days of cover is shorter than supplier lead time. See <b>Stockout Risk &amp; Reorder</b> (P1 list).")
+                 "Days of cover is shorter than supplier lead time. See the P1 list on Stockout Risk &amp; Reorder.")
         alerts += 1
     if k["exp30_batches"]:
         ui.alert("serious", f"{k['exp30_batches']} batch(es) expire within 30 days · {ui.money(k['exp30_value'], cur)}",
@@ -451,7 +541,7 @@ def page_dashboard() -> None:
         alerts += 1
     if k["unknown_expiry_batches"]:
         ui.alert("warning", f"{k['unknown_expiry_batches']} batch(es) have no readable expiry date",
-                 "Physically verify and correct the stock record — these cannot be expiry-controlled.")
+                 "Check the shelf and correct the stock record. Batches without an expiry date cannot be expiry-controlled.")
         alerts += 1
     if not alerts:
         ui.alert("good", "No critical alerts", "No Vital stockouts, no expired stock and nothing expiring within 30 days.")
@@ -501,7 +591,7 @@ def page_dashboard() -> None:
         plot(ch.value_by_category(sku, cur, height=340), "d_cat")
 
     ui.section("Today's priority actions", "Top reorder items (P1 first) and batches requiring compliance action")
-    t1, t2 = st.tabs(["🚨 Reorder priorities", "⏳ Expiry actions"])
+    t1, t2 = st.tabs(["Reorder priorities", "Expiry actions"])
     with t1:
         pri = sku[sku["Priority"] != ""].sort_values(["Priority_Score", "Days_On_Hand"], ascending=[False, True]).head(15)
         ui.table(pri, ["Priority", "Drug_Name", "Strength", "VEN_Class", "Stock_Status", "Usable_Qty", "Days_On_Hand",
@@ -536,7 +626,7 @@ def page_upload() -> None:
                         errs = "<br>".join(f"• <b>{i.column}</b>: {i.message}" for i in new_report.issues
                                            if i.severity == "error")
                         st.session_state["_upload_msg"] = (
-                            "critical", f"{up.name} was not loaded - required data missing",
+                            "critical", f"{up.name} was not loaded: required data is missing",
                             f"{errs}<br>Required columns: <code>{', '.join(REQUIRED_COLUMNS)}</code>. "
                             "The previous dataset is still active.")
                     else:
@@ -613,7 +703,7 @@ def page_expiry() -> None:
 
     if k["expired_cd_batches"]:
         ui.alert("critical", f"{k['expired_cd_batches']} expired controlled-drug batch(es)",
-                 "Segregate in the CD cabinet, mark 'EXPIRED – NOT FOR USE', and arrange witnessed destruction "
+                 "Segregate in the CD cabinet, mark 'EXPIRED: NOT FOR USE', and arrange witnessed destruction "
                  "with a controlled-drug register entry.")
     cold_near = b[b["Storage_Type"].ne("Room Temperature")
                   & b["Expiry_Bucket"].astype(str).isin(["Expired", "≤30 days", "31–60 days", "61–90 days"])]
@@ -637,12 +727,12 @@ def page_expiry() -> None:
         ui.section("Value by expiry window")
         plot(ch.expiry_bucket_bar(b, cur, height=380), "e_bucket")
     with c2:
-        ui.section("Expiry timeline – next 180 days", "Each point is a batch · ◆ = cold chain / frozen · hover for details")
+        ui.section("Expiry timeline, next 180 days", "Each point is a batch · ◆ = cold chain / frozen · hover for details")
         plot(ch.expiry_timeline(b, cur, pd.Timestamp(settings.reference_date)), "e_timeline")
 
-    ui.callout("<b>How the FEFO projection works:</b> batches are assumed to be dispensed First-Expiry-First-Out at the "
+    ui.callout("How the FEFO projection works: batches are assumed to be dispensed First-Expiry-First-Out at the "
                "product's average daily usage. <i>Projected unsold qty</i> is what will still be on the shelf on the "
-               "expiry date — act on it now (return, transfer, stop reordering) instead of writing it off later.")
+               "expiry date. Return it, transfer it or stop reordering now so it is not written off later.")
 
     ui.section("Batch register")
     windows = ["Expired", "≤30 days", "31–60 days", "61–90 days", "91–180 days", ">180 days", "Unknown expiry"]
@@ -675,7 +765,7 @@ def page_slow() -> None:
          "sub": f"No sale in {s.non_moving_days}+ days"},
         {"label": "Of which expire ≤ 180 d", "value": int((slow["Nearest_Expiry"] <= pd.Timestamp(s.reference_date)
                                                            + pd.Timedelta(days=180)).sum()),
-         "tone": "serious", "sub": "Highest write-off risk – act first"},
+         "tone": "serious", "sub": "Highest write-off risk, so act on these first"},
     ])
     c1, c2 = st.columns([2, 3], gap="large")
     with c1:
@@ -686,9 +776,9 @@ def page_slow() -> None:
         plot(ch.top_items_bar(slow, "Slow_Moving_Value", cur, color=ch.WARNING,
                               hover_cols={"Movement_Class": "Movement", "Location": "Location"},
                               x_title="Tied-up value"), "s_top")
-    ui.callout("<b>Recommended actions:</b> stop automatic reorders · transfer to a higher-demand branch or ward · "
-               "negotiate supplier return before the return window closes · review formulary need with prescribers · "
-               "for seasonal lines, plan next season's order from actual sell-through.")
+    ui.callout("Recommended actions: stop automatic reorders, transfer stock to a higher-demand branch or ward, "
+               "agree a supplier return before the return window closes and review formulary need with "
+               "prescribers. For seasonal lines, plan next season's order from actual sell-through.")
     ui.section("Slow & non-moving register")
     ui.table(slow, ["Drug_Name", "Strength", "Therapeutic_Category", "VEN_Class", "Movement_Class", "Usable_Qty",
                     "Units_Sold_90D", "Avg_Daily_Usage", "Days_On_Hand", "Days_Since_Last_Sale", "Nearest_Expiry",
@@ -717,9 +807,9 @@ def page_overstock() -> None:
     plot(ch.top_items_bar(over, "Excess_Value", cur, color=ch.BLUE[450],
                           hover_cols={"Storage_Type": "Storage", "Days_On_Hand": "Days on hand"},
                           x_title="Excess value"), "o_top")
-    ui.callout("<b>Recommended actions:</b> pause or reduce open purchase orders · redistribute to other sites · "
-               "for specialty/biologic items move to order-on-demand per patient · agree returns or consignment with "
-               "the supplier · lower max levels in your ordering system to the <i>target max qty</i> shown below.")
+    ui.callout("Recommended actions: pause or reduce open purchase orders and move surplus to other sites. Order "
+               "specialty and biologic items per patient, agree returns or consignment with the supplier, and set "
+               "the max levels in your ordering system to the <i>target max qty</i> shown below.")
     ui.section("Overstock register")
     ui.table(over, ["Drug_Name", "Strength", "Therapeutic_Category", "Storage_Type", "Seasonal", "VEN_Class", "Usable_Qty",
                     "Avg_Daily_Usage", "Days_On_Hand", "Target_Max_Qty", "Excess_Qty", "Excess_Value", "Nearest_Expiry",
@@ -748,14 +838,14 @@ def page_stockout() -> None:
          "tone": "good" if (k["vital_availability"] or 0) >= 98 else "critical", "sub": "Target ≥ 98%"},
     ])
     ui.section("Days of cover vs. supplier lead time",
-               "Bar = days usable stock will last · black tick = lead time. A bar shorter than its tick will run out before delivery.")
+               "Bar = days usable stock will last · vertical tick = lead time. A bar shorter than its tick will run out before delivery.")
     plot(ch.cover_vs_leadtime(sku), "so_cover")
-    ui.callout("<b>Priority logic:</b> urgency (Stocked out 3 · Critical 2 · Reorder 1) × VEN weight (V 3 · E 2 · N 1). "
-               "<b>P1</b> ≥ 6 · <b>P2</b> ≥ 3 · <b>P3</b> otherwise. Suggested quantity orders up to "
+    ui.callout("Priority logic: urgency (Stocked out 3 · Critical 2 · Reorder 1) × VEN weight (V 3 · E 2 · N 1). "
+               "P1 ≥ 6 · P2 ≥ 3 · P3 otherwise. Suggested quantity orders up to "
                f"lead time + {a.settings.target_cover_days} days of cover + safety stock, capped at Max_Stock_Level when supplied.")
     ui.section("Reorder worklist")
-    pri = st.pills("Priority", ["P1 – Immediate", "P2 – Urgent", "P3 – Routine"], selection_mode="multi",
-                   default=["P1 – Immediate", "P2 – Urgent", "P3 – Routine"], key="so_pri")
+    pri = st.pills("Priority", ["P1 (immediate)", "P2 (urgent)", "P3 (routine)"], selection_mode="multi",
+                   default=["P1 (immediate)", "P2 (urgent)", "P3 (routine)"], key="so_pri")
     view = at_risk[at_risk["Priority"].isin(pri)] if pri else at_risk
     ui.table(view, ["Priority", "Drug_Name", "Strength", "VEN_Class", "Drug_Class", "Stock_Status", "Usable_Qty",
                     "Avg_Daily_Usage", "Days_On_Hand", "Lead_Time_Days", "Projected_Stockout_Date", "Safety_Stock",
@@ -787,9 +877,9 @@ def page_abc_ven() -> None:
         ui.section("ABC Pareto curve", f"A ≤ {s.abc_a_pct:.0f}% · B ≤ {s.abc_b_pct:.0f}% of annual consumption value")
         plot(ch.pareto_curve(sku, s.abc_a_pct, s.abc_b_pct, height=380), "a_pareto")
 
-    ui.callout("<b>Category I</b> (AV, AE, AN, BV, CV) — " + ABC_VEN_CATEGORY_POLICY["I"] +
-               "<br><b>Category II</b> (BE, CE, BN) — " + ABC_VEN_CATEGORY_POLICY["II"] +
-               "<br><b>Category III</b> (CN) — " + ABC_VEN_CATEGORY_POLICY["III"])
+    ui.callout("Category I (AV, AE, AN, BV, CV). " + ABC_VEN_CATEGORY_POLICY["I"] +
+               "<br>Category II (BE, CE, BN). " + ABC_VEN_CATEGORY_POLICY["II"] +
+               "<br>Category III (CN). " + ABC_VEN_CATEGORY_POLICY["III"])
     ui.section("Classification register")
     cats = st.pills("Matrix category", ["I", "II", "III"], selection_mode="multi", default=["I", "II", "III"], key="abc_cat")
     view = sku[sku["ABC_VEN_Category"].isin(cats)] if cats else sku
@@ -848,29 +938,21 @@ def estimate_input_tokens(context: str) -> int | None:
         return None
 
 
-# Outcomes shown to users who have not subscribed: customer pain -> result.
+# What the paid plan adds, shown to users who have not subscribed.
 PLAN_BENEFITS = [
-    ("Never run out of life-critical medicines",
-     "Vital stockouts and items that will run out before the next delivery come first, with exactly what to "
-     "order today."),
-    ("Stop writing off expired stock",
-     "Know which batches to dispense first, return or transfer before they expire, and which controlled drugs "
-     "need action now."),
-    ("Free up cash stuck on the shelf",
-     "See where overstock and slow movers are locking up money, and what to pause, return or redistribute."),
-    ("Walk into your meeting ready",
-     "A prioritised action list, reorder table and charts, downloaded as PDF, PowerPoint, Word or Excel in one "
-     "click."),
-    ("Nothing urgent slips through",
-     "Every critical safety and compliance issue in your data is checked and included, every time."),
-    ("Decisions you can defend",
-     "Each action shows the figure behind it, plus the filters and thresholds the plan was built on."),
+    "Vital stockouts and items that will run out before the next delivery are listed first, with the "
+    "quantity to order.",
+    "Batches to dispense first, return or transfer before they expire, and expired controlled drugs.",
+    "Overstock and slow-moving stock, with what to pause, return or move to another site.",
+    "The plan, reorder table and charts as PDF, PowerPoint, Word and Excel files.",
+    "Safety and compliance issues found in your data are added by a code check if the AI leaves one out.",
+    "Each action states the figure behind it and the filters and thresholds the plan used.",
 ]
 
 
 def _scope_lines(report: agents.ActionReport, current_scope: str) -> list[str]:
     if report.scope and report.scope != current_scope:
-        return [f"Recommendations — {report.scope}", f"Charts and reorder table — {current_scope}"]
+        return [f"Recommendations: {report.scope}", f"Charts and reorder table: {current_scope}"]
     return [report.scope or current_scope]
 
 
@@ -914,7 +996,7 @@ def render_action_plan(plan: agents.ActionReport, a: Analysis, current_scope: st
     for i, rec in enumerate(plan.recommendations, 1):
         added = " · <i>added by the urgent-issue check</i>" if rec.get("source") == "check" else ""
         ui.alert(tone.get(rec["impact"], "info"), f"{i}. {_safe(rec['action'])}",
-                 f"<b>{_safe(rec['impact'])} impact · {_safe(rec['timeframe'])}</b> — {_safe(rec['rationale'])}"
+                 f"{_safe(rec['impact'])} impact · {_safe(rec['timeframe'])}: {_safe(rec['rationale'])}"
                  f"{added}")
 
     sku, b = a.sku, a.batches
@@ -952,10 +1034,10 @@ def page_ai_action_plan() -> None:
     if user is None or not user.is_paid:
         c1, c2 = st.columns([3, 2], gap="large")
         with c1:
-            ui.section("Walk into every stock meeting with a ready-made action plan",
-                       "Stop spending hours in spreadsheets working out what to fix first. The AI reads your stock "
-                       "position and tells you what to act on, in order of urgency.")
-            ui.callout("<br><br>".join(f"<b>{t}</b><br>{d}" for t, d in PLAN_BENEFITS))
+            ui.section("A written action plan for your stock meeting",
+                       "The AI reads the figures on these pages and lists what to act on, most urgent first.")
+            ui.callout("<ul style='margin:0;padding-left:18px'>"
+                       + "".join(f"<li>{d}</li>" for d in PLAN_BENEFITS) + "</ul>")
             st.caption("Built on the figures PharmaStock already calculates. Only a summary is sent for AI analysis, "
                        "never your uploaded file.")
         with c2:

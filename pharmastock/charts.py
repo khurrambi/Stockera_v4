@@ -40,7 +40,7 @@ EXPIRY_COLORS = {
 }
 STATUS_COLORS = {
     "Stocked out": CRITICAL,
-    "Critical – below lead time": SERIOUS,
+    "Critical (below lead time)": SERIOUS,
     "Reorder now": WARNING,
     "Healthy": GOOD,
     "Overstock": BLUE[450],
@@ -54,6 +54,85 @@ MOVEMENT_COLORS = {
     "Out of stock": MUTED,
 }
 DRUG_CLASS_COLORS = {"Prescription-Only (Rx)": CAT[0], "Narcotic / Controlled": CAT[1], "OTC": CAT[2]}
+
+
+# Dark mode is selected, not flipped: each light colour maps to its documented
+# dark step. Chrome moves to dark inks/hairlines, categorical slots take their
+# dark steps, and the heatmap's sequential ramp reverses so "near zero" recedes
+# into the dark surface. Status colours and the ordinal blue steps (all >= 2:1
+# on the dark surface) are unchanged.
+_DARK = {
+    INK: "#f5f5f2", INK_2: "#c3c2b7", GRID: "#2c2c2a", BASELINE: "#4a4a47",
+    "#ffffff": "#262624",   # hover label background
+    "#fcfcfb": "#121211",   # marker ring = page surface
+    CAT[0]: "#3987e5", CAT[1]: "#d95926", CAT[2]: "#199e70", CAT[3]: "#c98500",
+    CAT[4]: "#d55181", CAT[6]: "#9085e9", CAT[7]: "#e66767",
+    BLUE[100]: BLUE[700], BLUE[650]: BLUE[200],
+}
+
+
+def _recolor(node, mapping: dict[str, str]):
+    if isinstance(node, dict):
+        return {k: _recolor(v, mapping) for k, v in node.items()}
+    if isinstance(node, (list, tuple)):
+        return [_recolor(v, mapping) for v in node]
+    if isinstance(node, np.ndarray) and node.dtype == object:
+        return [_recolor(v, mapping) for v in node.tolist()]
+    if isinstance(node, str):
+        return mapping.get(node.lower(), node)
+    return node
+
+
+def _luminance(hex_color: str) -> float:
+    r, g, b = (int(hex_color.lstrip("#")[i:i + 2], 16) for i in (0, 2, 4))
+    return 0.299 * r + 0.587 * g + 0.114 * b
+
+
+def _cell_ink(colorscale: list, fraction: float) -> str:
+    """Dark or light ink for a heatmap cell, from the colour at ``fraction`` of the scale."""
+    stops = [(float(pos), _luminance(color)) for pos, color in colorscale]
+    lum = stops[-1][1]
+    for (p0, l0), (p1, l1) in zip(stops, stops[1:]):
+        if fraction <= p1:
+            lum = l0 + (l1 - l0) * ((fraction - p0) / (p1 - p0) if p1 > p0 else 0)
+            break
+    return INK if lum > 150 else "#f5f5f2"
+
+
+def _ink_heatmap_text(trace: dict, source) -> None:
+    """Colour each cell label for contrast. Plotly does this itself on a light
+    page, but the Streamlit dark template forces one light label colour.
+
+    Values are read from ``source`` (the original trace): ``to_dict`` packs
+    numeric arrays into a binary form."""
+    text, z = source.text, source.z
+    scale = trace.get("colorscale")
+    if text is None or z is None or not scale:
+        return
+    zmin = float(source.zmin) if source.zmin is not None else 0.0
+    zmax = float(source.zmax) if source.zmax is not None else 1.0
+    out = []
+    for row_text, row_z in zip(text, z):
+        row = []
+        for t, v in zip(row_text, row_z):
+            ink = _cell_ink(scale, min(max((float(v) - zmin) / ((zmax - zmin) or 1.0), 0.0), 1.0))
+            parts = [p.replace("<span style='", f"<span style='color:{ink};", 1) if p.startswith("<span style='")
+                     else f"<span style='color:{ink}'>{p}</span>" for p in str(t).split("<br>")]
+            row.append("<br>".join(parts))
+        out.append(row)
+    trace["text"] = out
+
+
+def themed(fig: go.Figure, mode: str) -> go.Figure:
+    """Return ``fig`` styled for ``mode`` ("light" or "dark"). Figures are built light."""
+    if mode != "dark":
+        return fig
+    mapping = {k.lower(): v for k, v in _DARK.items()}
+    spec = _recolor(fig.to_dict(), mapping)
+    for trace, source in zip(spec.get("data", []), fig.data):
+        if trace.get("type") == "heatmap":
+            _ink_heatmap_text(trace, source)
+    return go.Figure(spec)
 
 
 def _money(v: float, cur: str) -> str:
@@ -213,7 +292,7 @@ def top_items_bar(df: pd.DataFrame, value_col: str, cur: str, color: str = BLUE[
 
 
 def cover_vs_leadtime(sku: pd.DataFrame, top: int = 15, height: int | None = None) -> go.Figure:
-    d = sku[sku["Stock_Status"].isin(["Stocked out", "Critical – below lead time", "Reorder now"])].copy()
+    d = sku[sku["Stock_Status"].isin(["Stocked out", "Critical (below lead time)", "Reorder now"])].copy()
     if d.empty:
         return empty_figure("No SKUs at or below their reorder point")
     d["cover"] = d["Days_On_Hand"].replace(np.inf, np.nan).fillna(0)
@@ -262,7 +341,7 @@ def abc_ven_heatmap(sku: pd.DataFrame, metric: str, cur: str, height: int = 340)
     z = pivot.values
     zmax = z.max() if z.max() > 0 else 1
     fig = go.Figure(go.Heatmap(
-        z=z, x=["Vital (V)", "Essential (E)", "Non-essential (N)"], y=["A – high value", "B – medium", "C – low value"],
+        z=z, x=["Vital (V)", "Essential (E)", "Non-essential (N)"], y=["A (high value)", "B (medium)", "C (low value)"],
         colorscale=[[0, BLUE[100]], [0.5, BLUE[350]], [1, BLUE[650]]], zmin=0, zmax=zmax, showscale=False,
         text=text, texttemplate="%{text}", textfont=dict(size=14), xgap=3, ygap=3,
         customdata=cat,

@@ -39,8 +39,8 @@ TITLE = "PharmaStock AI Action Plan"
 BRAND = "#1c5cab"
 INK, INK_2, MUTED, LINE = "#0b0b0b", "#52514e", "#6f6d68", "#e1e0d9"
 IMPACT_COLORS = {"High": ch.CRITICAL, "Medium": ch.WARNING, "Low": ch.BLUE[300]}
-SUMMARY_HEADING = "What your data says"
-RECS_HEADING = "Actionable recommendations"
+SUMMARY_HEADING = "Summary"
+RECS_HEADING = "Recommendations"
 REORDER_HEADING = "Reorder priorities"
 REC_HEADER = ["#", "Action", "Impact", "When", "Why"]
 DISCLAIMER = ("Decision support only. Clinical and regulatory decisions remain with the responsible pharmacist. "
@@ -100,7 +100,7 @@ def build_bundle(a: Analysis, report: ActionReport, cur: str, dataset_label: str
                  current_scope: str) -> ReportBundle:
     scope_lines = [report.scope or current_scope]
     if report.scope and report.scope != current_scope:
-        scope_lines = [f"Recommendations — {report.scope}", f"Charts and reorder table — {current_scope}"]
+        scope_lines = [f"Recommendations: {report.scope}", f"Charts and reorder table: {current_scope}"]
     return ReportBundle(
         dataset_label=dataset_label, reference_date=f"{a.settings.reference_date:%d %b %Y}", currency=cur,
         report=report, charts=render_charts(a, cur), reorder=reorder_table(a, cur), scope_lines=scope_lines,
